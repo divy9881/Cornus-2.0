@@ -26,3 +26,12 @@ $ ssh -i /root/.ssh/id_ed25519 dspatel6:<cloudlab-node-name>
 # If above command fails, try removing known_hosts file
 $ rm -rf /root/.ssh/known_hosts
 ```
+
+### Setup Sundial DB
+```
+# Follow Step 0, Step 1, Step 2, and Step 4
+# Follow Redis setup from the README
+# Setup config.h which is missing in the codebase
+# Com
+$ ./tools/compile.sh
+```
