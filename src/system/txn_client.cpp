@@ -234,7 +234,7 @@ TxnManager::process_2pc_phase2(RC rc)
         _finish_time = get_sys_clock();
         #if LOG_DEVICE == LOG_DVC_REDIS
         rpc_log_semaphore->incr();
-        redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc);
+        redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
         #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
         azure_blob_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
         #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED

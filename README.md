@@ -194,10 +194,5 @@ In file included from /users/itsnasa/cpp_redis/includes/cpp_redis/cpp_redis:41,
 compilation terminated.
 ```
 Solution:
-```
-git clone https://github.com/Cylix/tacopie  
-cd <tacopie_directory>
-make
-```
 Append the `INCLUDE` flag with the following path:
-`-I/users/itsnasa/tacopie/includes/`
+`-I/users/itsnasa/cpp_redis/tacopie/includes/`
