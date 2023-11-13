@@ -7,7 +7,7 @@
 #define NUM_STORAGE_NODES               0
 #define NODE_TYPE                       COMPUTE_NODE
 
-// number of server threads on each node
+// Number of server threads on each node
 #define NUM_WORKER_THREADS              4096 //2048 //1024
 #define NUM_RPC_SERVER_THREADS          24
 
@@ -25,7 +25,7 @@
 #define WORKLOAD                        TPCC
 #define RUN_TIME                        10 // in second
 
-// debugging
+// Debugging
 #define DEBUG_PRINT                     false
 #define DEBUG_ELR                       false
 
@@ -59,10 +59,10 @@
 #define WRITE_PERMISSION_LOCK           false
 #define ATOMIC_TIMESTAMP                "false"
 
-// when WAW_LOCK is true, lock a tuple before write.
+// Ehen WAW_LOCK is true, lock a tuple before write.
 // essentially, WW conflicts are handled as 2PL.
 #define OCC_WAW_LOCK                    true
-// if SKIP_READONLY_PREPARE is true, then a readonly subtxn will forget
+// If SKIP_READONLY_PREPARE is true, then a readonly subtxn will forget
 // about its states after returning. If no renewal is required, this remote
 // node will not participate in the 2PC protocol.
 #define SKIP_READONLY_PREPARE           false
@@ -90,7 +90,7 @@
 #define UPDATE_TABLE_TS                 true
 
 // [HSTORE]
-// when set to true, hstore will not access the global timestamp.
+// When set to true, hstore will not access the global timestamp.
 // This is fine for single partition transactions.
 #define HSTORE_LOCAL_TS                 false
 
@@ -104,7 +104,7 @@
 
 // Benchmark
 // =========
-// max number of rows touched per transaction
+// Max number of rows touched per transaction
 #define MAX_TUPLE_SIZE                  1024 // in bytes
 #define INIT_PARALLELISM                8
 
@@ -152,7 +152,7 @@
 
 // Constant
 // ========
-// index structure
+// Index structure
 #define IDX_HASH                        1
 #define IDX_BTREE                       2
 // WORKLOAD

@@ -11,8 +11,9 @@ __pycache__
 info.txt
 outputs/*.json
 tools/*.csv
-src/config.h
 src/rundb
+src/proto
 *.xml
 .idea/workspace.xml
 experiment-setups
+redis/
