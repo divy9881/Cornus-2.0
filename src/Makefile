@@ -12,7 +12,7 @@ GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 CFLAGS = -Wno-unknown-pragmas -Wall -g -std=c++14
 INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./transport -I./proto -I./utils
 # for azure storage
-#INCLUDE += -I/home/kanwu/vcpkg/installed/x64-linux/include
+# INCLUDE += -I/home/kanwu/vcpkg/installed/x64-linux/include
 
 CFLAGS += $(INCLUDE) -D NOGRAPHITE=1 -Og -g -fpermissive
 
@@ -24,8 +24,8 @@ LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\
            -lcpp_redis -ltacopie
 # for azure storage
 # LDFLAGS += -lcpprest -lboost_system -lboost_log -lboost_log_setup -lboost_thread -lboost_serialization\
-           -luuid -lxml2 -lz -llzma -lssl -lcrypto -lpthread -ldl
-#LDFLAGS += -L/home/kanwu/vcpkg/installed/x64-linux/lib -lazurestorage\
+#            -luuid -lxml2 -lz -llzma -lssl -lcrypto -lpthread -ldl
+# LDFLAGS += -L/home/kanwu/vcpkg/installed/x64-linux/lib -lazurestorage\
 
 CPPS = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)*.cpp))
 OBJS = $(CPPS:.cpp=.o)
