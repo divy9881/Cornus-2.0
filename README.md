@@ -166,7 +166,7 @@ Output
 The output file is stored in ```outputs/```. The output data should be mostly self-explanatory. More details can be found in system/stats.cpp.
 
 
-Troubleshooring:
+Troubleshooting:
 1. ```Package re2 was not found in the pkg-config search path```
 Solution: Clone and build `re2`:
 ```

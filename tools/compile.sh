@@ -1,6 +1,6 @@
 #!/bin/bash
-source $HOME/Cornus-2.0/tools/setup_env.sh
-mkdir -p $HOME/Cornus-2.0/outputs/
-cd $HOME/Cornus-2.0/src
+repo=Cornus-2.0
+source $HOME/$repo/tools/setup_env.sh
+mkdir -p $HOME/$repo/outputs/
+cd $HOME/$repo/src
 make -j16 $1
-
