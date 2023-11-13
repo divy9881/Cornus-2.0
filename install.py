@@ -16,7 +16,7 @@ def load_environment(fname="info.txt"):
         env["user"] = lines[0]
         env["repo"] = lines[1]
     else:
-        f = open(fname)
+        f = open(fname, "w")
         env["user"] = input("enter user name: ")
         f.write(env["user"] + "\n")
         env["repo"] = os.getcwd()
