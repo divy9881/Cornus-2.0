@@ -156,3 +156,40 @@ Output
 ------
 
 The output file is stored in ```outputs/```. The output data should be mostly self-explanatory. More details can be found in system/stats.cpp.
+
+
+Troubleshooring:
+1. ```Package re2 was not found in the pkg-config search path```
+Solution: Clone and build `re2`:
+```
+git clone https://github.com/google/re2.git
+cd <re2 directory>
+make
+make install
+make testinstall
+```
+2. Include error in #include <cpp_redis/cpp_redis>
+In the src/Makefile, append the `INCLUDE` flag with the following path:  
+`-I/<path_to_cpp_redis>/includes`
+
+3. Include error in tcp_client.hpp
+```
+compilation terminated.
+make: *** [Makefile:48: system/txn_client.o] Error 1
+make: *** [Makefile:48: system/global.o] Error 1
+In file included from /users/itsnasa/cpp_redis/includes/cpp_redis/cpp_redis:41,
+                 from transport/redis_client.h:8,
+                 from transport/rpc_server.cpp:6:
+/users/itsnasa/cpp_redis/includes/cpp_redis/network/tcp_client.hpp:28:10: fatal error: tacopie/tacopie: No such file or directory
+   28 | #include <tacopie/tacopie>
+      |          ^~~~~~~~~~~~~~~~~
+compilation terminated.
+```
+Solution:
+```
+git clone https://github.com/Cylix/tacopie  
+cd <tacopie_directory>
+make
+```
+Append the `INCLUDE` flag with the following path:
+`-I/users/itsnasa/tacopie/includes/`
