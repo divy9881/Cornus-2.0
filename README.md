@@ -84,7 +84,7 @@ on Master
 - set up ```protected-mode``` (e.g. password), you can use ```protected-mode 
   no``` but it is dangerous for public cloud without setting ```requirepass```
 - set ```appendonly yes```
-- set ```fsync always```
+- set ```appendfsync always```
 - set ```dir <your desired path for log>```, e.g. 
   ```dir /users/scarletg/redis_data```
 - set ```requirepass sundial-dev```
