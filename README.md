@@ -36,6 +36,11 @@ Setup Compute Node
   asking about whether to add the ip address
 - setup locally: ```python3 install.py setkey_local```
 
+### Step 1A: Setup tacopie TCP Client
+- Clone the tacopie repository
+`git clone https://github.com/Cylix/tacopie`
+- Follow the steps [here](https://github.com/Cylix/tacopie/wiki/Mac-&-Linux-Install) to install the library for the Sundial setup.
+
 ### Step 2: Install dependency
 
 - install locally: ```python3 install.py install_local```
