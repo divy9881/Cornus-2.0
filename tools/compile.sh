@@ -1,6 +1,6 @@
 #!/bin/bash
-source $HOME/Sundial-Private/tools/setup_env.sh
-mkdir -p $HOME/Sundial-Private/outputs/
-cd $HOME/Sundial-Private/src
+source $HOME/Cornus-2.0/tools/setup_env.sh
+mkdir -p $HOME/Cornus-2.0/outputs/
+cd $HOME/Cornus-2.0/src
 make -j16 $1
 

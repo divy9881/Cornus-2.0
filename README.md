@@ -77,6 +77,14 @@ cd
 mkdir redis_data/
 ```
 
+Test redis (Optional)
+```
+cd redis
+apt-get install tcl
+make test
+```
+
+
 Open ```redis.conf``` to setup of Redis:
 
 on Master
