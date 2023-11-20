@@ -9,14 +9,14 @@ SRC_DIRS = ./ ./benchmarks/ ./concurrency_control/ ./storage/ ./system/ ./transp
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
-CFLAGS = -Wno-unknown-pragmas -Wall -g -std=c++14
+CFLAGS = -Wno-unknown-pragmas -Wall -g -std=c++17
 INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./transport -I./proto -I./utils -I/users/dspatel6/cpp_redis/includes -I/users/dspatel6/cpp_redis/tacopie/includes/
 # for azure storage
 # INCLUDE += -I/home/kanwu/vcpkg/installed/x64-linux/include
 
 CFLAGS += $(INCLUDE) -D NOGRAPHITE=1 -Og -g -fpermissive
 
-LDFLAGS = -Wall -L. -L./libs -pthread -g -lrt -std=c++11 -Og -ljemalloc
+LDFLAGS = -Wall -L. -L./libs -pthread -g -lrt -std=c++17 -Og -ljemalloc
 
 # for redis storage & grpc
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\

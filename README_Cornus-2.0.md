@@ -8,7 +8,7 @@ $ apt-get install g++ ssh -y
 ### Generate Public-Private key-pair for remote SSH
 ```
 # Create SSH key using ED25519 Cryptographyic Algorithm and CloudLab username
-$ ssh-keygen -t ed25519 -C "dspatel6"
+$ ssh-keygen -t ed25519 -C "<identifier>"
 ```
 
 ### Setup public key in the CloudLab

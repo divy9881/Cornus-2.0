@@ -50,15 +50,13 @@ Setup Compute Node
 
 ### Step 3: Setup SSH Key Authorization Remotely
 
-- setup key authorization for each node ```python3
-  install.py setkey_remote```
+- setup key authorization for each node ```python3 install.py setkey_remote```
   - troubleshooting: command not returned.
     - sometimes first ssh access will spin on requiring input for 
     "The authenticity of host 'node-0 (x.x.x.x)' can't be established.
     ECDSA key fingerprint is SHA256:xxx.
     Are you sure you want to continue connecting (yes/no)?"
-    - if this is the case, on each node, try executing ```sudo ssh <other node 
-      ip>``` to bypass the question. 
+    - if this is the case, on each node, try executing ```sudo ssh <other node ip>``` to bypass the question. 
 
 ### Step 4: More Setups
 
