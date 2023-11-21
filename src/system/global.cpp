@@ -103,4 +103,4 @@ string ifconfig_string =
   "localhost:10000\n"
   "localhost:10001";
 
-uint64_t g_failure_pt = FAILURE_TIMEPOINT * BILLION;
+// uint64_t g_failure_pt = FAILURE_TIMEPOINT * BILLION;

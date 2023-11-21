@@ -25,6 +25,6 @@ cd grpc
 git submodule update --init
 cd test/distrib/cpp/
 cp ${HOME}/Cornus-2.0/tools/run_distrib_test_cmake.sh ./
-source ./run_distrib_test_cmake.sh
+./run_distrib_test_cmake.sh
 export PKG_CONFIG_PATH=/usr/local/grpc/lib/pkgconfig
 export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
