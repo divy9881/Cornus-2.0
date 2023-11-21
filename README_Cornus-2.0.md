@@ -29,7 +29,12 @@ $ rm -rf /root/.ssh/known_hosts
 
 ### Setup Sundial DB
 ```
-# Follow Step 0, Step 1, Step 2, and Step 4
+$ PROTOC_ZIP=protoc-3.15.8-linux-x86_64.zip
+$ curl -OL https://github.com/google/protobuf/releases/download/v3.15.8/$PROTOC_ZIP
+$ sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
+$ sudo unzip -o $PROTOC_ZIP -d /usr/local include/*
+$ rm -f $PROTOC_ZIP
+# Follow Step 0, Step 1, Step 2, Step 4
 # Follow Redis setup from the README
 # Setup config.h which is missing in the codebase
 # Com
