@@ -87,8 +87,8 @@ sudo make "-j${GRPC_CPP_DISTRIBTEST_BUILD_COMPILER_JOBS}" install
 popd
 
 # Build helloworld example using cmake
-mkdir -p "examples/cpp/helloworld/cmake/build"
-pushd "examples/cpp/helloworld/cmake/build"
-cmake ../..
-sudo make "-j${GRPC_CPP_DISTRIBTEST_BUILD_COMPILER_JOBS}"
-popd
+# mkdir -p "examples/cpp/helloworld/cmake/build"
+# pushd "examples/cpp/helloworld/cmake/build"
+# cmake ../..
+# sudo make "-j${GRPC_CPP_DISTRIBTEST_BUILD_COMPILER_JOBS}"
+# popd

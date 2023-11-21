@@ -16,12 +16,17 @@ INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./
 
 CFLAGS += $(INCLUDE) -D NOGRAPHITE=1 -Og -g -fpermissive
 
+<<<<<<< HEAD
 LDFLAGS = -Wall -L. -L./libs -pthread -g -lrt -std=c++17 -Og -ljemalloc
+=======
+LDFLAGS = -Wall -L. -L./libs -pthread -g -lrt -std=c++11 -Og -ljemalloc
+LDLIB = -lssl -lcrypto -lre2 -lcares
+>>>>>>> 5e951d8 (fix: change make file)
 
 # for redis storage & grpc
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\
            -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl\
-           -lcpp_redis -ltacopie
+           -lcpp_redis -ltacopie -l/usr/local/ssl/lib
 # for azure storage
 # LDFLAGS += -lcpprest -lboost_system -lboost_log -lboost_log_setup -lboost_thread -lboost_serialization\
 #            -luuid -lxml2 -lz -llzma -lssl -lcrypto -lpthread -ldl
@@ -33,7 +38,7 @@ DEPS = $(CPPS:.cpp=.d)
 
 rundb: TARGET=rundb
 rundb: $(OBJS)
-	$(CC) -no-pie -o $@ $^ $(LDFLAGS)
+	$(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 runstorage: TARGET=runstorage
 runstorage: $(OBJS)
