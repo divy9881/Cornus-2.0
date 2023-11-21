@@ -26,7 +26,7 @@ LDLIB = -lssl -lcrypto -lre2 -lcares
 # for redis storage & grpc
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\
            -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl\
-           -lcpp_redis -ltacopie -l/usr/local/ssl/lib
+           -lcpp_redis -ltacopie
 # for azure storage
 # LDFLAGS += -lcpprest -lboost_system -lboost_log -lboost_log_setup -lboost_thread -lboost_serialization\
 #            -luuid -lxml2 -lz -llzma -lssl -lcrypto -lpthread -ldl
