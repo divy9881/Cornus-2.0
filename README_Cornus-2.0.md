@@ -48,7 +48,7 @@ $ cp ${HOME}/Cornus-2.0/tools/run_distrib_test_cmake.sh ./
 
 # The following command should take long time ideally
 $ ./run_distrib_test_cmake.sh
-$ export PKG_CONFIG_PATH=/usr/local/grpc/lib/pkgconfig
+$ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 $ export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 # Make sure whether gRPC is installed correctly by testing, following command, it should output a path(not null)
