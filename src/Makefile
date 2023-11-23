@@ -10,7 +10,7 @@ GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
 CFLAGS = -Wno-unknown-pragmas -Wall -g -std=c++17
-INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./transport -I./proto -I./utils -I/users/dspatel6/cpp_redis/includes -I/users/dspatel6/cpp_redis/tacopie/includes/
+INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./transport -I./proto -I./utils -I$(HOME)/cpp_redis/includes -I$(HOME)/cpp_redis/tacopie/includes/
 # for azure storage
 # INCLUDE += -I/home/kanwu/vcpkg/installed/x64-linux/include
 
@@ -38,20 +38,20 @@ DEPS = $(CPPS:.cpp=.d)
 
 rundb: TARGET=rundb
 rundb: $(OBJS)
-        $(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
+		$(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 runstorage: TARGET=runstorage
 runstorage: $(OBJS)
-        $(CC) -no-pie -o $@ $^ $(LDFLAGS)
+		$(CC) -no-pie -o $@ $^ $(LDFLAGS)
 
 -include $(OBJS:%.o=%.d)
 
 %.d: %.cpp
-        $(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
+		$(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
 
 %.o: %.cpp
-        $(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
+		$(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
 
 .PHONY: clean
 clean:
-        rm -f rundb runstorage $(OBJS) $(DEPS)
+	rm -f rundb runstorage $(OBJS) $(DEPS)
