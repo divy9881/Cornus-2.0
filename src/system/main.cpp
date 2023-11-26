@@ -15,6 +15,7 @@
 #include "redis_client.h"
 #include "azure_blob_client.h"
 #include "global.h"
+#include "log_buffer.h"
 
 void * start_thread(void *);
 void * start_rpc_server(void *);

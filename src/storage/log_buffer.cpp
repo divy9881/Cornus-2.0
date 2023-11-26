@@ -16,7 +16,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
     if (this->size >= LOG_BUFFER_HW_CAPACITY)
     {
 #if DEBUG_PRINT
-        printf("Log buffer has %d transactions, total logs (%d); "
+        printf("Log buffer has %ld transactions, total logs (%d); "
                "near High watermark capacity (%d). "
                "Signalled the log spill thread. Time: %lu\n",
                this->_buffer.size(), this->size,
@@ -36,7 +36,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
     if (this->size == DEFAULT_BUFFER_SIZE)
     {
 #if DEBUG_PRINT
-        printf("Log buffer has (%d) transactions, total logs (%d), FULL. "
+        printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
                "Spilling the logs to the persistent storage. Time: %lu\n",
                this->_buffer.size(), this->size, get_sys_clock());
 #endif
@@ -51,7 +51,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
 
 void LogBuffer::print()
 {
-    printf("The buffer has %d transactions and %d logs\n", this->_buffer.size(), this->size);
+    printf("The buffer has %ld transactions and %d logs\n", this->_buffer.size(), this->size);
     for (auto a : this->_buffer)
     {
         cout << a.first << " ";
@@ -127,7 +127,7 @@ void *spill_buffered_logs_to_storage(void *args)
             txn_id_cache.push_back(log_txn_id);
             txn_log_str.push_back(current_txn_log.substr(0, current_txn_log.size() - 1) + ";");
         }
-        for (int ii = 0; ii < txn_id_cache.size(); ii++)
+        for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
         {
             buf->_buffer.erase(txn_id_cache[ii]);
         }
@@ -148,7 +148,7 @@ void *spill_buffered_logs_to_storage(void *args)
         buf->_buffer_signal->notify_one();
         unique_buffer_lock.unlock();
 
-        for (int ii = 0; ii <= txn_id_cache.size(); ii++)
+        for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
         {
             uint64_t txn_id = txn_id_cache[ii];
             std::string txn_logs = txn_log_str[ii];
