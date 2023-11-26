@@ -13,7 +13,7 @@ std::atomic_bool log_spill_required;
 // Make a singleton class for the log buffer
 class LogBuffer
 {
-private:
+public:
     // Buffer - (txn_id1: [<node_id_1>:status:data|<node_id_2>:status:data|<node_id_3>:status:data|..]),
     //          (txn_id2: [<node_id_x>:status:data|<node_id_y>:status:data|<node_id_z>:status:data|,,]) 
     std::map <uint64_t, std::vector<std::pair<uint64_t, std::string>>> _buffer;
@@ -31,11 +31,13 @@ public:
 
     LogBuffer(const LogBuffer& obj) = delete;
     static LogBuffer* getBufferInstance();
-    int add_log(uint64_t node_id, uint64_t txn_id, std::string &data);
+    int add_log(uint64_t node_id, uint64_t txn_id, int status, std::string &data);
     void print();
 
-    friend int spill_buffered_logs_to_storage(LogBuffer &, bool);
+    // friend int spill_buffered_logs_to_storage(LogBuffer &, bool);
 };
+
+// friend int spill_buffered_logs_to_storage(void *args);
 
 LogBuffer::LogBuffer() {
     current_buffer_size = 0;

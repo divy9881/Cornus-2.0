@@ -26,6 +26,7 @@
 
 #include "config.h"
 #include "stats.h"
+#include "log_buffer.h"
 
 using std::cout;
 using std::endl;
@@ -213,6 +214,8 @@ extern AzureBlobClient *      azure_blob_client;
 #endif
 #if GROUP_COMMITS_ENABLED
 extern LogBuffer*       LOGGER;
+extern pthread_t*       log_spiller;
+struct spiller_args;
 #endif
 
 extern Transport *      transport;
