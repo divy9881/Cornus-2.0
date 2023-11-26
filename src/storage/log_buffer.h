@@ -30,7 +30,7 @@ public:
     LogBuffer();
     ~LogBuffer();
 
-    LogBuffer(const LogBuffer& obj) = delete;
+    // LogBuffer(const LogBuffer& obj) = delete;
     static LogBuffer* getBufferInstance();
     int add_log(uint64_t node_id, uint64_t txn_id, int status, std::string &data);
     void print();
@@ -54,10 +54,10 @@ LogBuffer::LogBuffer() {
 LogBuffer::~LogBuffer() {
 }
 
-(static LogBuffer*) LogBuffer::getBufferInstance() {
-    if (LogBuffer::logBufferInstance == NULL) {
-        logBufferInstance = new LogBuffer();
-        return logBufferInstance;
-    }
-    return logBufferInstance;
-}
+// (static LogBuffer*) LogBuffer::getBufferInstance() {
+//     if (LogBuffer::logBufferInstance == NULL) {
+//         logBufferInstance = new LogBuffer();
+//         return logBufferInstance;
+//     }
+//     return logBufferInstance;
+// }
