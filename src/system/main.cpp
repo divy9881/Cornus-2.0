@@ -51,6 +51,9 @@ int main(int argc, char* argv[])
         cout << "[Sundial] creating Azure Blob client" << endl;
         azure_blob_client = new AzureBlobClient();
     #endif
+    #if GROUP_COMMITS_ENABLED
+        LOGGER = new LogBuffer();
+    #endif
 
     glob_stats = new Stats;
 

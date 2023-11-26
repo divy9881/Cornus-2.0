@@ -8,7 +8,7 @@
 #define NODE_TYPE                       COMPUTE_NODE
 
 // Number of server threads on each node
-#define NUM_WORKER_THREADS              4096 //2048 //1024
+#define NUM_WORKER_THREADS              1024 //4096 //2048 //1024
 #define NUM_RPC_SERVER_THREADS          24
 
 // Statistics
@@ -101,6 +101,7 @@
 #define LOG_SIZE_PER_WRITE              32 // in bytes
 #define LOG_TLS_REDIS                   false // if redis needs tls tunnel
 #define AZURE_ISOLATION_ENABLE          true
+#define GROUP_COMMITS_ENABLED           true // Group the commit logs and flush once
 
 // Benchmark
 // =========
@@ -200,3 +201,9 @@
 #define COMPUTE_NODE                    1
 #define STORAGE_NODE                    2
 
+// Group commit parameters
+#define DEFAULT_BUFFER_SIZE             1000
+#define EMPTY_LOG_BUFFER_TIMEDELTA      300 // 300ms
+#define EMPTY_LOG_BUFFER_HW             70 // High watermark in log buffer to schedule spillover to persistent storage
+#define LOG_BUFFER_HW_CAPACITY\
+            int(DEFAULT_BUFFER_SIZE*(EMPTY_LOG_BUFFER_HW/100))
