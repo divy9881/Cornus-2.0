@@ -3,7 +3,6 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "global.h"
 #include "ycsb.h"
 #include "ycsb_query.h"
 #include "tpcc.h"
@@ -15,6 +14,7 @@
 #include "rpc_client.h"
 #include "redis_client.h"
 #include "azure_blob_client.h"
+#include "global.h"
 
 void * start_thread(void *);
 void * start_rpc_server(void *);

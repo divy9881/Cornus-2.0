@@ -26,7 +26,6 @@
 
 #include "config.h"
 #include "stats.h"
-#include "log_buffer.h"
 
 using std::cout;
 using std::endl;
