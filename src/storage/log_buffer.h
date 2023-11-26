@@ -22,6 +22,7 @@ public:
     std::atomic_bool is_spilling;
     int _max_buffer_size; // Maximum size of records that can be in the buffer at once
     int current_buffer_size;
+    uint64_t size; // Count of total logs added
     static LogBuffer* logBufferInstance;
 public:
     uint64_t last_flush_timestamp;
@@ -47,6 +48,7 @@ LogBuffer::LogBuffer() {
     _buffer_lock = new std::mutex;
     _buffer_signal = new std::condition_variable;
     log_spill_required = false;
+    this->size = 0;
 }
 
 LogBuffer::~LogBuffer() {

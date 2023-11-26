@@ -4,7 +4,7 @@
 #include <string>
 #include <algorithm>
 
-#include "LogBuffer.h"
+#include "log_buffer.h"
 #include "redis_client.h"
 #include "azure_blob_client.h"
 
@@ -15,11 +15,13 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
     buffer_unique_lock.lock();
     while (this->is_spilling)
         this->_buffer_signal->wait(buffer_unique_lock);
-    if (this->_buffer.size() >= LOG_BUFFER_HW_CAPACITY) {
+    if (this->size >= LOG_BUFFER_HW_CAPACITY) {
         #if DEBUG_PRINT
-            printf("Log buffer size (%d) near High watermark capacity (%d). "
-               "Signalled the log spill thread. Time: %lu\n",
-               this->_buffer.size(), LOG_BUFFER_HW_CAPACITY, get_sys_clock());
+            printf("Log buffer has %d transactions, total logs (%d); "
+                "near High watermark capacity (%d). "
+                "Signalled the log spill thread. Time: %lu\n",
+                this->_buffer.size(), this->size,
+                LOG_BUFFER_HW_CAPACITY, get_sys_clock());
         #endif
         // Schedule log writer thread to empty out the log buffer
         log_spill_required = true;
@@ -30,11 +32,12 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
     }
     status_data += data;
     this->_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
-    if (this->_buffer.size() == DEFAULT_BUFFER_SIZE) {
+    this->size++;
+    if (this->size == DEFAULT_BUFFER_SIZE) {
         #if DEBUG_PRINT
-            printf("Log buffer size (%d) FULL. "
+            printf("Log buffer has (%d) transactions, total logs (%d), FULL. "
                "Spilling the logs to the persistent storage. Time: %lu\n",
-               this->_buffer.size(), get_sys_clock());
+               this->_buffer.size(), this->size, get_sys_clock());
         #endif
         struct spiller_args force_arguments;
         force_arguments.logger_instance = LOGGER;
@@ -46,7 +49,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
 }
 
 void LogBuffer::print() {
-    cout<<"Size of the map is "<<this->_buffer.size()<<endl;
+    cout<<"Size of the map is "<<this->sizeendl;
     for (auto a: this->_buffer) {
         cout << a.first << " ";
         for (auto iter: a.second) {
@@ -56,11 +59,14 @@ void LogBuffer::print() {
     }
 }
 
+// The logs will be of the format txn_id1-nodeid1:msg1|nodeid2:msg2;txn_id2-nodeid1:msg1|nodeid2:msg2;
+// TODO 1. Different types of logs for both phases (?)
 void * spill_buffered_logs_to_storage(void* args) {
     struct spiller_args *arguments = (struct spiller_args) args;
     bool force_empty = arguments->force;
     LogBuffer *buf = arguments->logger_instance;
     std::unique_lock<std::mutex> unique_buffer_lock(*(buf->_buffer_lock));
+
     while (true) {
 
         // If this is not an explicit call, wait for standard sleep and wakeup
@@ -80,31 +86,39 @@ void * spill_buffered_logs_to_storage(void* args) {
         unique_buffer_lock.lock();
         buf->is_spilling = true;
 
-        uint32_t buffer_size = buf->_buffer.size();
-        // we map the transaction ID to log_str one-to-one
-        uint64_t txn_id_cache[buffer_size]; // We store the transaction ID
-        std::string log_str[buffer_size]; // we store one string per transaction ID
-        int cache_iterator = 0;
+        uint32_t buffer_size = buf->size
+
+        // we map the transaction ID to txn_log_str[ii]; one-to-one
+        std::vector<uint64_t> txn_id_cache;
+        std::vector<std::string> txn_log_str[ii];; // we store one string per transaction ID
+
+        uint64_t largest_txn_id = 0; // Overall largest TXN ID
+        std::map <uint64_t, uint64_t> node_largest_lsn; // Largest LSN for one particular node
+
         for (auto buffer_iterator: buf->_buffer) {
             uint64_t log_txn_id = buffer_iterator.first;
-            txn_id_cache[cache_iterator] = log_txn_id;
             std::vector<std::pair<uint64_t, std::string>> node_id_message_list = buffer_iterator.second;
             // Sort on basis of the node id for easier processing of the message later
-            std::sort(node_id_message_list.begin(), node_id_message_list.end());
+            // std::sort(node_id_message_list.begin(), node_id_message_list.end());
+
             // Store the largest LSN for a node
             string current_txn_log;
             for (auto node_id_msg_iter: node_id_message_list) {
-                // if (node_largest_txn_id_cache[node_id_msg_iter.first] < log_txn_id) {
-                //     node_largest_txn_id_cache[node_id_msg_iter.first] = log_txn_id;
-                // }
+                if (largest_txn_id < log_txn_id) {
+                    largest_txn_id = log_txn_id;
+                }
+                if (node_largest_lsn[node_id_msg_iter.first] < log_txn_id) {
+                    node_largest_lsn[node_id_msg_iter.first] = log_txn_id; 
+                }
                 current_txn_log += std::to_string(node_id_msg_iter.first) + ':' + node_id_msg_iter.second + '|';    
             }
-            log_str[cache_iterator] = current_txn_log;
-            cache_iterator++;
+            txn_id_cache.push_back(log_txn_id);
+            txn_log_str.push_back(current_txn_log.substr(0, current_txn_log.size()-1) + ";");
         }
-        for (int ii = 0 ; ii < buffer_size; ii++) {
+        for (int ii = 0 ; ii < txn_id_cache.size(); ii++) {
             buf->_buffer.erase(txn_id_cache[ii]);
         }
+        buf->size = 0; // all the logs are popped
 
         buf->is_spilling = false;
         buf->last_flush_timestamp = get_server_clock();
@@ -120,14 +134,19 @@ void * spill_buffered_logs_to_storage(void* args) {
         buf->_buffer_signal->notify_one();
         unique_buffer_lock.unlock();
 
-        #if LOG_DEVICE == LOG_DVC_REDIS
-        // Log to REDIS and set the LSN in the txn_table for the transactions
-        // redis_client->log_sync_data(g_node_id, )
-        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        // Log to AZURE
-        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        #endif
-
+        for (int ii = 0 ; ii <= txn_id_cache.size(); ii++) {
+            uint64_t txn_id = txn_id_cache[ii];
+            std::string txn_logs = txn_log_str[ii];
+            // TODO set the LSN in the txn_table for the transactions
+            // TODO How to read the logs for one transaction, for one node
+            #if LOG_DEVICE == LOG_DVC_REDIS
+            redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+            #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+            azure_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+            #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+            redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+            #endif
+        }
         // If this was a force spill, exit after spilling
         if (force_empty) {
             return NULL;
