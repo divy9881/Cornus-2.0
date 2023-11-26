@@ -89,10 +89,6 @@ RedisClient *       redis_client;
 AzureBlobClient *       azure_blob_client;
 LogBuffer*          LOGGER;
 pthread_t*         log_spiller;
-struct spiller_args {
-    LogBuffer* logger_instance;
-    bool force;
-};
 
 Transport *     transport;
 //InOutQueue **   input_queues;

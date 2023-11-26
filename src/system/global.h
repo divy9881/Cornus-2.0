@@ -215,7 +215,10 @@ extern AzureBlobClient *      azure_blob_client;
 #if GROUP_COMMITS_ENABLED
 extern LogBuffer*       LOGGER;
 extern pthread_t*       log_spiller;
-struct spiller_args;
+struct spiller_args {
+    LogBuffer* logger_instance;
+    bool force;
+};
 #endif
 
 extern Transport *      transport;
