@@ -44,7 +44,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
     if (this->size >= LOG_BUFFER_HW_CAPACITY)
     {
 #if DEBUG_PRINT
-        printf("Log buffer has %ld transactions, total logs (%d); "
+        printf("Log buffer has %ld transactions, total logs (%ld); "
                "near High watermark capacity (%d). "
                "Signalled the log spill thread. Time: %lu\n",
                this->_buffer.size(), this->size,
@@ -52,6 +52,9 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
 #endif
         // Schedule log writer thread to empty out the log buffer
         log_spill_required = true;
+        this->_buffer_signal->notify_one();
+        buffer_unique_lock.unlock()
+        return 0;
     }
     std::string status_data = "E"; // Empty status
     if (status != -1)
@@ -61,18 +64,14 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
     status_data += data;
     this->_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
     this->size++;
-    if (this->size == DEFAULT_BUFFER_SIZE)
-    {
-#if DEBUG_PRINT
-        printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
-               "Spilling the logs to the persistent storage. Time: %lu\n",
-               this->_buffer.size(), this->size, get_sys_clock());
-#endif
-        struct spiller_args force_arguments;
-        force_arguments.logger_instance = LOGGER;
-        force_arguments.force = true;
-        spill_buffered_logs_to_storage((void *)&force_arguments);
-    }
+//     if (this->size == DEFAULT_BUFFER_SIZE)
+//     {
+// #if DEBUG_PRINT
+//         printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
+//                "Spilling the logs to the persistent storage. Time: %lu\n",
+//                this->_buffer.size(), this->size, get_sys_clock());
+// #endif
+//     }
     buffer_unique_lock.unlock();
     return ret;
 }
@@ -173,7 +172,7 @@ void *spill_buffered_logs_to_storage(void *args)
             log_spill_required = false;
         }
         // Unlock the buffer after reading and emptying it. We will keep on spilling async.
-        buf->_buffer_signal->notify_one();
+        buf->_buffer_signal->notify_all();
         unique_buffer_lock.unlock();
 
         for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
