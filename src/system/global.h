@@ -21,6 +21,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>
+#include <atomic>
 //#include <boost/lockfree/queue.hpp>
 #include "pthread.h"
 
@@ -50,6 +51,7 @@ class SundialRPCClient;
 class SundialRPCServerImpl;
 class RedisClient;
 class AzureBlobClient;
+class LogBuffer;
 
 typedef uint64_t ts_t; // time stamp type
 
@@ -111,6 +113,8 @@ extern double           g_perc_order_status;
 extern double           g_perc_delivery;
 
 extern char             ifconfig_file[];
+
+extern std::atomic_bool log_spill_required;
 
 enum RC {RCOK, COMMIT, ABORT, WAIT, LOCAL_MISS, SPECULATE, ERROR, FINISH, FAIL};
 enum access_t {RD, WR, XP, SCAN, INS, DEL};
@@ -209,6 +213,10 @@ extern RedisClient *      redis_client;
 #endif
 #if LOG_DEVICE == LOG_DVC_AZURE_BLOB
 extern AzureBlobClient *      azure_blob_client;
+#endif
+#if GROUP_COMMITS_ENABLED
+extern LogBuffer*       LOGGER;
+extern pthread_t*       log_spiller;
 #endif
 
 extern Transport *      transport;

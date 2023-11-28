@@ -3,7 +3,6 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "global.h"
 #include "ycsb.h"
 #include "ycsb_query.h"
 #include "tpcc.h"
@@ -15,6 +14,8 @@
 #include "rpc_client.h"
 #include "redis_client.h"
 #include "azure_blob_client.h"
+#include "global.h"
+#include "log_buffer.h"
 
 void * start_thread(void *);
 void * start_rpc_server(void *);
@@ -50,6 +51,14 @@ int main(int argc, char* argv[])
     #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
         cout << "[Sundial] creating Azure Blob client" << endl;
         azure_blob_client = new AzureBlobClient();
+    #endif
+    #if GROUP_COMMITS_ENABLED
+        LOGGER = new LogBuffer;
+        struct spiller_args *args = new struct spiller_args;
+        args->logger_instance = LOGGER;
+        args->force = false;
+        log_spiller = new pthread_t;
+        pthread_create(log_spiller, nullptr, spill_buffered_logs_to_storage, (void*) args);
     #endif
 
     glob_stats = new Stats;
@@ -156,6 +165,11 @@ int main(int argc, char* argv[])
     if (STATS_ENABLE)
         glob_stats->print();
     glob_manager->active = false;
+#if GROUP_COMMITS_ENABLED
+    pthread_cancel(*log_spiller);
+    delete LOGGER;
+    delete args;
+#endif
 #if NUM_STORAGE_NODES > 0
     // only the first node has right to terminate
     if (g_node_id == 0) {
