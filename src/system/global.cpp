@@ -89,6 +89,7 @@ RedisClient *       redis_client;
 AzureBlobClient *       azure_blob_client;
 LogBuffer*          LOGGER;
 pthread_t*         log_spiller;
+std::atomic_bool log_spill_required = false;
 
 Transport *     transport;
 //InOutQueue **   input_queues;

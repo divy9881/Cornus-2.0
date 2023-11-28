@@ -1,10 +1,38 @@
 #include <queue>
 #include <string>
 #include <algorithm>
+#include <iostream>
 
 #include "log_buffer.h"
-#include "redis_client.h"
-#include "azure_blob_client.h"
+
+extern RedisClient*     redis_client;
+extern AzureBlobClient* azure_blob_client;
+extern LogBuffer*       LOGGER;
+
+LogBuffer::LogBuffer()
+{
+    current_buffer_size = 0;
+    this->_max_buffer_size = DEFAULT_BUFFER_SIZE;
+    this->last_flush_timestamp = 0;
+    this->is_spilling = false;
+    _buffer_lock = new std::mutex;
+    _buffer_signal = new std::condition_variable;
+    log_spill_required = false;
+    this->size = 0;
+}
+
+LogBuffer::~LogBuffer()
+{
+}
+
+// (static LogBuffer*) LogBuffer::getBufferInstance() {
+//     if (LogBuffer::logBufferInstance == NULL) {
+//         logBufferInstance = new LogBuffer();
+//         return logBufferInstance;
+//     }
+//     return logBufferInstance;
+// }
+
 
 int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::string data)
 {
@@ -25,7 +53,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
         // Schedule log writer thread to empty out the log buffer
         log_spill_required = true;
     }
-    string status_data = "E"; // Empty status
+    std::string status_data = "E"; // Empty status
     if (status != -1)
     {
         status_data = std::to_string(status);
@@ -51,15 +79,15 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
 
 void LogBuffer::print()
 {
-    printf("The buffer has %ld transactions and %d logs\n", this->_buffer.size(), this->size);
+    printf("The buffer has %ld transactions and %ld logs\n", this->_buffer.size(), this->size);
     for (auto a : this->_buffer)
     {
-        cout << a.first << " ";
+        std::cout << a.first << " ";
         for (auto iter : a.second)
         {
-            cout << iter.first << ":" << iter.second << "|";
+            std::cout << iter.first << ":" << iter.second << "|";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 

@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
         azure_blob_client = new AzureBlobClient();
     #endif
     #if GROUP_COMMITS_ENABLED
-        LOGGER = new LogBuffer();
+        LOGGER = new LogBuffer;
         struct spiller_args *args = new struct spiller_args;
         args->logger_instance = LOGGER;
         args->force = false;

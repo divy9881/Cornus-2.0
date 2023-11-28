@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef LOG_BUFFER_H_
+#define LOG_BUFFER_H_
+
 #include "config.h"
 #include <queue>
 #include "pthread.h"
@@ -8,10 +11,17 @@
 #include <condition_variable>
 #include <atomic>
 #include <map>
+#include "azure_blob_client.h"
+#include "redis_client.h"
 
-std::atomic_bool log_spill_required;
+extern std::atomic_bool log_spill_required;
 
-// Make a singleton class for the log buffer
+struct spiller_args {
+    LogBuffer* logger_instance;
+    bool force;
+};
+
+
 class LogBuffer
 {
 public:
@@ -40,26 +50,5 @@ public:
 
 void * spill_buffered_logs_to_storage(void* args);
 
-LogBuffer::LogBuffer()
-{
-    current_buffer_size = 0;
-    this->_max_buffer_size = DEFAULT_BUFFER_SIZE;
-    this->last_flush_timestamp = 0;
-    this->is_spilling = false;
-    _buffer_lock = new std::mutex;
-    _buffer_signal = new std::condition_variable;
-    log_spill_required = false;
-    this->size = 0;
-}
 
-LogBuffer::~LogBuffer()
-{
-}
-
-// (static LogBuffer*) LogBuffer::getBufferInstance() {
-//     if (LogBuffer::logBufferInstance == NULL) {
-//         logBufferInstance = new LogBuffer();
-//         return logBufferInstance;
-//     }
-//     return logBufferInstance;
-// }
+#endif // LOG_BUFFER_H_

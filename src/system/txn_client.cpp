@@ -31,6 +31,7 @@
 #endif
 #include "redis_client.h"
 #include "azure_blob_client.h"
+#include "log_buffer.h"
 
 
 RC
