@@ -87,7 +87,7 @@ TxnManager::process_2pc_phase1()
                 g_log_sz * 8, 'd');
         rpc_log_semaphore->incr();
     #if COMMIT_ALG == ONE_PC
-        #if GROUP_COMMITS_ENABLED
+        #if GROUP_COMMITS_ENABLE
             LOGGER->add_log(g_node_id, get_txn_id(), -1, data);
         #else
             #if LOG_DEVICE == LOG_DVC_REDIS
@@ -100,9 +100,9 @@ TxnManager::process_2pc_phase1()
             sendRemoteLogRequest(PREPARED, num_local_write * g_log_sz * 8,
                                 g_node_id);
             #endif
-        #endif // GROUP_COMMITS_ENABLED
+        #endif // GROUP_COMMITS_ENABLE
     #else
-        #if GROUP_COMMITS_ENABLED
+        #if GROUP_COMMITS_ENABLE
             // This is first phase log
             LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
         #else
@@ -116,7 +116,7 @@ TxnManager::process_2pc_phase1()
             sendRemoteLogRequest(PREPARED, num_local_write * g_log_sz * 8,
                                     g_node_id);
             #endif
-        #endif // GROUP_COMMITS_ENABLED
+        #endif // GROUP_COMMITS_ENABLE
     #endif // COMMIT_ALG == ONE_PC
     }
 
@@ -226,7 +226,7 @@ TxnManager::process_2pc_phase2(RC rc)
 
     rpc_log_semaphore->incr();
     #if COMMIT_ALG == TWO_PC
-        #if GROUP_COMMITS_ENABLED
+        #if GROUP_COMMITS_ENABLE
         // TODO have different functions for phase 1 and 2
             LOGGER->add_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
         #else
@@ -240,14 +240,14 @@ TxnManager::process_2pc_phase2(RC rc)
             rpc_log_semaphore->wait();
             sendRemoteLogRequest(rc_to_state(rc), 1, g_node_id, SundialRequest::RESP_OK);
             #endif
-        #endif // GROUP_COMMITS_ENABLED
+        #endif // GROUP_COMMITS_ENABLE
         // finish after log is stable.
         rpc_log_semaphore->wait();
         _finish_time = get_sys_clock();
     #elif COMMIT_ALG == ONE_PC
         // finish before sending out logs.
         _finish_time = get_sys_clock();
-        #if GROUP_COMMITS_ENABLED
+        #if GROUP_COMMITS_ENABLE
             LOGGER->add_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
         #else
             #if LOG_DEVICE == LOG_DVC_REDIS
@@ -260,7 +260,7 @@ TxnManager::process_2pc_phase2(RC rc)
             rpc_log_semaphore->wait();
             sendRemoteLogRequest(rc_to_state(rc), 1, g_node_id,
                                 SundialRequest::RESP_OK);
-            #endif // GROUP_COMMITS_ENABLED
+            #endif // GROUP_COMMITS_ENABLE
         #endif
     #elif COMMIT_ALG == COORDINATOR_LOG
         // log all at once
@@ -283,7 +283,7 @@ TxnManager::process_2pc_phase2(RC rc)
             redis_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
             rpc_log_semaphore->wait();
             sendRemoteLogRequest(rc_to_state(rc), data.length(), g_node_id, SundialRequest::RESP_OK);
-            #endif // GROUP_COMMITS_ENABLED
+            #endif // GROUP_COMMITS_ENABLE
         #endif
         // finish after log is stable.
         rpc_log_semaphore->wait();

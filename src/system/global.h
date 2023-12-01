@@ -214,7 +214,7 @@ extern RedisClient *      redis_client;
 #if LOG_DEVICE == LOG_DVC_AZURE_BLOB
 extern AzureBlobClient *      azure_blob_client;
 #endif
-#if GROUP_COMMITS_ENABLED
+#if GROUP_COMMITS_ENABLE
 extern LogBuffer*       LOGGER;
 extern pthread_t*       log_spiller;
 #endif

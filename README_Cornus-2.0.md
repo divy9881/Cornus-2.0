@@ -60,6 +60,14 @@ $ which grpc_cpp_plugin
 
 # Setup config.h which is missing in the codebase
 
+To use group commits, do the following steps, you have to set the GROUP_COMMITS_ENABLE to true in config.h
+Other tunables for the group commits are as follows:
+DEFAULT_BUFFER_SIZE -> Total count of transaction logs to be retained in the buffer
+EMPTY_LOG_BUFFER_TIMEDELTA -> Total millisecs to wait before flushing
+EMPTY_LOG_BUFFER_HW -> High watermark (in percentage) of the total buffer size after which the data will be scheduled to spill
+
 # Compile the Cornus source files
 $ ./tools/compile.sh
 ```
+
+ 

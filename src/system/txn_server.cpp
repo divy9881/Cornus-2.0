@@ -83,31 +83,31 @@ TxnManager::process_prepare_request(const SundialRequest* request,
             #if COMMIT_ALG == ONE_PC
             redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
             #else
-                #if GROUP_COMMITS_ENABLED
+                #if GROUP_COMMITS_ENABLE
                 LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
                 #else
                 redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
-                #endif // GROUP_COMMITS_ENABLED
+                #endif // GROUP_COMMITS_ENABLE
             #endif  // ONE_PC
         #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
             #if COMMIT_ALG == ONE_PC
             azure_blob_client->log_if_ne_data(g_node_id, get_txn_id(), data);
             #else
-                #if GROUP_COMMITS_ENABLED
+                #if GROUP_COMMITS_ENABLE
                 LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
                 #else
                 azure_blob_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
-                #endif // GROUP_COMMITS_ENABLED
+                #endif // GROUP_COMMITS_ENABLE
             #endif  // ONE_PC
         #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
             #if COMMIT_ALG == ONE_PC
             redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
             #else
-                #if GROUP_COMMITS_ENABLED
+                #if GROUP_COMMITS_ENABLE
                 LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
                 #else
                 redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
-                #endif // GROUP_COMMITS_ENABLED
+                #endif // GROUP_COMMITS_ENABLE
             #endif
             rpc_log_semaphore->wait();
             sendRemoteLogRequest(PREPARED, num_tuples * g_log_sz * 8,

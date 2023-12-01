@@ -108,7 +108,7 @@ void *spill_buffered_logs_to_storage(void *args)
             // Wait for either the sleep to complete, or if the log spill
             // is being forced (used in spurious wakeups)
             buf->_buffer_signal->wait_for(unique_buffer_lock,
-                                          std::chrono::seconds(EMPTY_LOG_BUFFER_TIMEDELTA),
+                                          std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA),
                                           [&]
                                           { return !buf->_buffer.empty() || log_spill_required; });
         }

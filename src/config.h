@@ -101,7 +101,14 @@
 #define LOG_SIZE_PER_WRITE              32 // in bytes
 #define LOG_TLS_REDIS                   false // if redis needs tls tunnel
 #define AZURE_ISOLATION_ENABLE          true
-#define GROUP_COMMITS_ENABLED           true // Group the commit logs and flush once
+#define GROUP_COMMITS_ENABLE           true // Group the commit logs and flush once
+// Group commit logging parameters
+#define DEFAULT_BUFFER_SIZE             5000
+#define EMPTY_LOG_BUFFER_TIMEDELTA      300 // 300ms
+#define EMPTY_LOG_BUFFER_HW             80 // High watermark in log buffer to schedule spillover to persistent storage
+#define LOG_BUFFER_HW_CAPACITY\
+            int(DEFAULT_BUFFER_SIZE*(EMPTY_LOG_BUFFER_HW/100))
+
 
 // Benchmark
 // =========
@@ -200,10 +207,3 @@
 // Node Type
 #define COMPUTE_NODE                    1
 #define STORAGE_NODE                    2
-
-// Group commit parameters
-#define DEFAULT_BUFFER_SIZE             1000
-#define EMPTY_LOG_BUFFER_TIMEDELTA      300 // 300ms
-#define EMPTY_LOG_BUFFER_HW             70 // High watermark in log buffer to schedule spillover to persistent storage
-#define LOG_BUFFER_HW_CAPACITY\
-            int(DEFAULT_BUFFER_SIZE*(EMPTY_LOG_BUFFER_HW/100))
