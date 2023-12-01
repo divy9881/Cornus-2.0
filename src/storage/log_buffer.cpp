@@ -53,7 +53,7 @@ int LogBuffer::add_log(uint64_t node_id, uint64_t txn_id, int status, std::strin
         // Schedule log writer thread to empty out the log buffer
         log_spill_required = true;
         this->_buffer_signal->notify_one();
-        buffer_unique_lock.unlock()
+        buffer_unique_lock.unlock();
         return 0;
     }
     std::string status_data = "E"; // Empty status
