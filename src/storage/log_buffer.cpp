@@ -48,13 +48,13 @@ int LogBuffer::add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, st
     buffer_unique_lock.lock();
     while (this->_prepare_buffer_spilling)
         this->_prepare_buffer_signal->wait(buffer_unique_lock);
-    if (this->_prep_buf_size >= LOG_BUFFER_HW_CAPACITY)
+    if (this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY)
     {
 #if DEBUG_PRINT
         printf("Log buffer has %ld transactions, total logs (%ld); "
                "near High watermark capacity (%d). "
                "Signalled the log spill thread. Time: %lu\n",
-               this->_prepare_buffer.size(), this->_prep_buf_size,
+               this->_prepare_buffer.size(), this->_prepare_buf_size,
                LOG_BUFFER_HW_CAPACITY, get_sys_clock());
 #endif
         // Schedule log writer thread to empty out the log buffer
@@ -70,13 +70,13 @@ int LogBuffer::add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, st
     }
     status_data += data;
     this->_prepare_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
-    this->_prep_buf_size++;
-//     if (this->_prep_buf_size == DEFAULT_BUFFER_SIZE)
+    this->_prepare_buf_size++;
+//     if (this->_prepare_buf_size == DEFAULT_BUFFER_SIZE)
 //     {
 // #if DEBUG_PRINT
 //         printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
 //                "Spilling the logs to the persistent storage. Time: %lu\n",
-//                this->_prepare_buffer.size(), this->_prep_buf_size, get_sys_clock());
+//                this->_prepare_buffer.size(), this->_prepare_buf_size, get_sys_clock());
 // #endif
 //     }
     buffer_unique_lock.unlock();
@@ -91,13 +91,13 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
     buffer_unique_lock.lock();
     while (this->_commit_buffer_spilling)
         this->_commit_buffer_signal->wait(buffer_unique_lock);
-    if (this->_prep_buf_size >= LOG_BUFFER_HW_CAPACITY)
+    if (this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY)
     {
 #if DEBUG_PRINT
         printf("Log buffer has %ld transactions, total logs (%ld); "
                "near High watermark capacity (%d). "
                "Signalled the log spill thread. Time: %lu\n",
-               this->_commit_buffer.size(), this->_prep_buf_size,
+               this->_commit_buffer.size(), this->_prepare_buf_size,
                LOG_BUFFER_HW_CAPACITY, get_sys_clock());
 #endif
         // Schedule log writer thread to empty out the log buffer
@@ -113,13 +113,13 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
     }
     status_data += data;
     this->_commit_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
-    this->_prep_buf_size++;
-//     if (this->_prep_buf_size == DEFAULT_BUFFER_SIZE)
+    this->_prepare_buf_size++;
+//     if (this->_prepare_buf_size == DEFAULT_BUFFER_SIZE)
 //     {
 // #if DEBUG_PRINT
 //         printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
 //                "Spilling the logs to the persistent storage. Time: %lu\n",
-//                this->_commit_buffer.size(), this->_prep_buf_size, get_sys_clock());
+//                this->_commit_buffer.size(), this->_prepare_buf_size, get_sys_clock());
 // #endif
 //     }
     buffer_unique_lock.unlock();
@@ -128,7 +128,7 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
 
 void LogBuffer::print()
 {
-    printf("The buffer has %ld transactions and %ld logs\n", this->_prepare_buffer.size(), this->_prep_buf_size);
+    printf("The buffer has %ld transactions and %ld logs\n", this->_prepare_buffer.size(), this->_prepare_buf_size);
     for (auto a : this->_prepare_buffer)
     {
         std::cout << a.first << " ";
@@ -185,7 +185,7 @@ void LogBuffer::flush_prepare_logs(void)
     {
         this->_prepare_buffer.erase(txn_id_cache[ii]);
     }
-    this->_prep_buf_size = 0; // all the logs are popped
+    this->_prepare_buf_size = 0; // all the logs are popped
 
     this->_prepare_buffer_spilling = false;
     this->last_prepare_flush_timestamp = get_server_clock();
@@ -269,7 +269,7 @@ void LogBuffer::flush_commit_logs(void)
     {
         this->_commit_buffer.erase(txn_id_cache[ii]);
     }
-    this->_prep_buf_size = 0; // all the logs are popped
+    this->_prepare_buf_size = 0; // all the logs are popped
 
     this->_commit_buffer_spilling = false;
     this->last_commit_flush_timestamp = get_server_clock();
