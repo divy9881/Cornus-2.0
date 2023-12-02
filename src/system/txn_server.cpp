@@ -84,7 +84,7 @@ TxnManager::process_prepare_request(const SundialRequest* request,
             redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
             #else
                 #if GROUP_COMMITS_ENABLE
-                LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
+                LOGGER->add_prepare_log(g_node_id, get_txn_id(), PREPARED, data);
                 #else
                 redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
                 #endif // GROUP_COMMITS_ENABLE
@@ -94,7 +94,7 @@ TxnManager::process_prepare_request(const SundialRequest* request,
             azure_blob_client->log_if_ne_data(g_node_id, get_txn_id(), data);
             #else
                 #if GROUP_COMMITS_ENABLE
-                LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
+                LOGGER->add_prepare_log(g_node_id, get_txn_id(), PREPARED, data);
                 #else
                 azure_blob_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
                 #endif // GROUP_COMMITS_ENABLE
@@ -104,7 +104,7 @@ TxnManager::process_prepare_request(const SundialRequest* request,
             redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
             #else
                 #if GROUP_COMMITS_ENABLE
-                LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
+                LOGGER->add_prepare_log(g_node_id, get_txn_id(), PREPARED, data);
                 #else
                 redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
                 #endif // GROUP_COMMITS_ENABLE

@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
         struct spiller_args *args = new struct spiller_args;
         args->logger_instance = LOGGER;
         args->force = false;
-        log_spiller = new pthread_t;
-        pthread_create(log_spiller, nullptr, spill_buffered_logs_to_storage, (void*) args);
+        // log_spiller = new pthread_t;
+        // pthread_create(log_spiller, nullptr, flush_prepare_logs, (void*) args);
     #endif
 
     glob_stats = new Stats;
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
         glob_stats->print();
     glob_manager->active = false;
 #if GROUP_COMMITS_ENABLE
-    pthread_cancel(*log_spiller);
+    // pthread_cancel(*log_spiller);
     delete LOGGER;
     delete args;
 #endif

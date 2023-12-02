@@ -88,7 +88,7 @@ TxnManager::process_2pc_phase1()
         rpc_log_semaphore->incr();
     #if COMMIT_ALG == ONE_PC
         #if GROUP_COMMITS_ENABLE
-            LOGGER->add_log(g_node_id, get_txn_id(), -1, data);
+            LOGGER->add_prepare_log(g_node_id, get_txn_id(), -1, data);
         #else
             #if LOG_DEVICE == LOG_DVC_REDIS
             redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
@@ -104,7 +104,7 @@ TxnManager::process_2pc_phase1()
     #else
         #if GROUP_COMMITS_ENABLE
             // This is first phase log
-            LOGGER->add_log(g_node_id, get_txn_id(), PREPARED, data);
+            LOGGER->add_prepare_log(g_node_id, get_txn_id(), PREPARED, data);
         #else
             #if LOG_DEVICE == LOG_DVC_REDIS
             redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
@@ -228,7 +228,7 @@ TxnManager::process_2pc_phase2(RC rc)
     #if COMMIT_ALG == TWO_PC
         #if GROUP_COMMITS_ENABLE
         // TODO have different functions for phase 1 and 2
-            LOGGER->add_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
         #else
         // 2pc: persistent decision
             #if LOG_DEVICE == LOG_DVC_REDIS
@@ -248,7 +248,7 @@ TxnManager::process_2pc_phase2(RC rc)
         // finish before sending out logs.
         _finish_time = get_sys_clock();
         #if GROUP_COMMITS_ENABLE
-            LOGGER->add_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
         #else
             #if LOG_DEVICE == LOG_DVC_REDIS
             rpc_log_semaphore->incr();
@@ -273,7 +273,7 @@ TxnManager::process_2pc_phase2(RC rc)
         }
         // 2pc: persistent decision
         #if GROUP_COMMIT_ENABLED
-            LOGGER->add_log(g_node_id, get_txn_id(), rc_to_state(rc), data);
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), data);
         #else
             #if LOG_DEVICE == LOG_DVC_REDIS
             redis_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);

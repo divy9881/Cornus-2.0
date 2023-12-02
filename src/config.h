@@ -101,7 +101,7 @@
 #define LOG_SIZE_PER_WRITE              32 // in bytes
 #define LOG_TLS_REDIS                   false // if redis needs tls tunnel
 #define AZURE_ISOLATION_ENABLE          true
-#define GROUP_COMMITS_ENABLE           true // Group the commit logs and flush once
+#define GROUP_COMMITS_ENABLE            true // Group the commit logs and flush once
 // Group commit logging parameters
 #define DEFAULT_BUFFER_SIZE             5000
 #define EMPTY_LOG_BUFFER_TIMEDELTA      300 // 300ms
