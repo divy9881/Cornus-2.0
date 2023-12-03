@@ -28,14 +28,14 @@ public:
     // Buffer - (txn_id1: [<node_id_1>:status:data|<node_id_2>:status:data|<node_id_3>:status:data|..]),
     //          (txn_id2: [<node_id_x>:status:data|<node_id_y>:status:data|<node_id_z>:status:data|,,])
     std::map<uint64_t, std::vector<std::pair<uint64_t, std::string>>> _prepare_buffer;
-    std::mutex *_prepare_buffer_lock;
+    std::mutex *_prepare_buffer_lock, *_prepare_flush_lock;
     std::condition_variable *_prepare_buffer_signal;
     std::atomic_bool _prepare_buffer_spilling;
     uint64_t _max_prepare_buffer_size; // Maximum size of records that can be in the buffer at once
     uint64_t _prepare_buf_size; // Current count of total logs added
 
     std::map<uint64_t, std::vector<std::pair<uint64_t, std::string>>> _commit_buffer;
-    std::mutex *_commit_buffer_lock;
+    std::mutex *_commit_buffer_lock, *_commit_flush_lock;
     std::condition_variable *_commit_buffer_signal;
     std::atomic_bool _commit_buffer_spilling;
     uint64_t _max_commit_buffer_size; // Maximum size of records that can be in the buffer at once

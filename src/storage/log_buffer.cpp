@@ -16,6 +16,7 @@ LogBuffer::LogBuffer()
     this->last_prepare_flush_timestamp = 0;
     this->_prepare_buffer_spilling = false;
     this->_prepare_buffer_lock = new std::mutex;
+    this->_prepare_flush_lock = new std::mutex;
     this->_prepare_buffer_signal = new std::condition_variable;
     log_spill_required = false;
     this->_prepare_buf_size = 0;
@@ -23,8 +24,10 @@ LogBuffer::LogBuffer()
     // Initialize commit buffer
     this->_max_commit_buffer_size = DEFAULT_BUFFER_SIZE;
     this->last_commit_flush_timestamp = 0;
-    this->_prepare_buffer_lock = new std::mutex;
-    this->_prepare_buffer_signal = new std::condition_variable;
+    this->_commit_buffer_spilling = false;
+    this->_commit_buffer_lock = new std::mutex;
+    this->_commit_flush_lock = new std::mutex;
+    this->_commit_buffer_signal = new std::condition_variable;
     this->_commit_buf_size = 0;
 }
 
@@ -40,96 +43,21 @@ LogBuffer::~LogBuffer()
 //     return logBufferInstance;
 // }
 
-
-int LogBuffer::add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, std::string data)
-{
-    std::unique_lock<std::mutex> buffer_unique_lock(*(this->_prepare_buffer_lock));
-    int ret = 0;
-    buffer_unique_lock.lock();
-    while (this->_prepare_buffer_spilling)
-        this->_prepare_buffer_signal->wait(buffer_unique_lock);
-    if (this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY)
-    {
-#if DEBUG_PRINT
-        printf("Log buffer has %ld transactions, total logs (%ld); "
-               "near High watermark capacity (%d). "
-               "Signalled the log spill thread. Time: %lu\n",
-               this->_prepare_buffer.size(), this->_prepare_buf_size,
-               LOG_BUFFER_HW_CAPACITY, get_sys_clock());
-#endif
-        // Schedule log writer thread to empty out the log buffer
-        this->flush_prepare_logs();
-        this->_prepare_buffer_signal->notify_all();
-        buffer_unique_lock.unlock();
-        return 0;
-    }
-    std::string status_data = "E"; // Empty status
-    if (status != -1)
-    {
-        status_data = std::to_string(status);
-    }
-    status_data += data;
-    this->_prepare_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
-    this->_prepare_buf_size++;
-//     if (this->_prepare_buf_size == DEFAULT_BUFFER_SIZE)
-//     {
-// #if DEBUG_PRINT
-//         printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
-//                "Spilling the logs to the persistent storage. Time: %lu\n",
-//                this->_prepare_buffer.size(), this->_prepare_buf_size, get_sys_clock());
-// #endif
-//     }
-    buffer_unique_lock.unlock();
-    return ret;
-}
-
-
-int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std::string data)
-{
-    std::unique_lock<std::mutex> buffer_unique_lock(*(this->_commit_buffer_lock));
-    int ret = 0;
-    buffer_unique_lock.lock();
-    while (this->_commit_buffer_spilling)
-        this->_commit_buffer_signal->wait(buffer_unique_lock);
-    if (this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY)
-    {
-#if DEBUG_PRINT
-        printf("Log buffer has %ld transactions, total logs (%ld); "
-               "near High watermark capacity (%d). "
-               "Signalled the log spill thread. Time: %lu\n",
-               this->_commit_buffer.size(), this->_prepare_buf_size,
-               LOG_BUFFER_HW_CAPACITY, get_sys_clock());
-#endif
-        // Schedule log writer thread to empty out the log buffer
-        this->flush_commit_logs();
-        this->_commit_buffer_signal->notify_all();
-        buffer_unique_lock.unlock();
-        return 0;
-    }
-    std::string status_data = "E"; // Empty status
-    if (status != -1)
-    {
-        status_data = std::to_string(status);
-    }
-    status_data += data;
-    this->_commit_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
-    this->_prepare_buf_size++;
-//     if (this->_prepare_buf_size == DEFAULT_BUFFER_SIZE)
-//     {
-// #if DEBUG_PRINT
-//         printf("Log buffer has (%ld) transactions, total logs (%d), FULL. "
-//                "Spilling the logs to the persistent storage. Time: %lu\n",
-//                this->_commit_buffer.size(), this->_prepare_buf_size, get_sys_clock());
-// #endif
-//     }
-    buffer_unique_lock.unlock();
-    return ret;
-}
-
 void LogBuffer::print()
 {
-    printf("The buffer has %ld transactions and %ld logs\n", this->_prepare_buffer.size(), this->_prepare_buf_size);
+    printf("The PREPARE buffer has %ld transactions and %ld logs\n", this->_prepare_buffer.size(), this->_prepare_buf_size);
     for (auto a : this->_prepare_buffer)
+    {
+        std::cout << a.first << " ";
+        for (auto iter : a.second)
+        {
+            std::cout << iter.first << ":" << iter.second << "|";
+        }
+        std::cout << std::endl;
+    }
+
+    printf("The COMMIT buffer has %ld transactions and %ld logs\n", this->_commit_buffer.size(), this->_commit_buf_size);
+    for (auto a : this->_commit_buffer)
     {
         std::cout << a.first << " ";
         for (auto iter : a.second)
@@ -140,15 +68,58 @@ void LogBuffer::print()
     }
 }
 
+int LogBuffer::add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, std::string data)
+{
+    std::unique_lock<std::mutex> buffer_unique_lock(*(this->_prepare_buffer_lock));
+    int ret = 0;
+
+    while (this->_prepare_buffer_spilling.load())
+        this->_prepare_buffer_signal->wait(buffer_unique_lock);
+
+    // Check If the log requires flushing
+    if (this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY) {
+        // If the transaction logs already exist in the buffer, since we still have some
+        // space to allow logs, add the log without flushing
+        if (this->_prepare_buffer.find(txn_id) == this->_prepare_buffer.end()) {
+            // If the txn does not exist in the logs, first flush.
+            std::unique_lock <std::mutex> flush_lock(*(this->_prepare_flush_lock));
+            // Recheck the flush conditions to avoid race
+            if (!this->_prepare_buffer_spilling.load() &&
+                this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY) {
+#if DEBUG_PRINT
+            printf("PREPARE Log buffer has %ld transactions, total logs (%ld); "
+                "near High watermark capacity (%d). "
+                "Signalled the log spill thread. Time: %lu\n",
+                this->_prepare_buffer.size(), this->_prepare_buf_size,
+                LOG_BUFFER_HW_CAPACITY, get_sys_clock());
+#endif
+                    this->_prepare_buffer_spilling.store(true);
+                    this->flush_prepare_logs();
+                    this->_prepare_buffer_spilling.store(false);
+            }
+        }
+    } // The flush_lock is released as the scope is over. Subsequent threads will see that the buffer_size is less than watermark
+
+    std::string status_data = "E"; // Empty status
+    if (status != -1)
+    {
+        status_data = std::to_string(status);
+    }
+    status_data += data;
+    // We still hold the buffer_unique_lock
+    this->_prepare_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
+    this->_prepare_buf_size++;
+    buffer_unique_lock.unlock();
+    return ret;
+}
+
 // The logs will be of the format txn_id1-nodeid1:msg1|nodeid2:msg2;txn_id2-nodeid1:msg1|nodeid2:msg2;
 // TODO 1. Different types of logs for both phases (?)
 void LogBuffer::flush_prepare_logs(void)
 {
-    std::unique_lock<std::mutex> unique_buffer_lock(*(this->_prepare_buffer_lock));
-
-    // Lock the mutex and set the spilling flag
-    unique_buffer_lock.lock();
-    this->_prepare_buffer_spilling = true;
+    if (!this->_prepare_buffer_spilling.load()) {
+        this->_prepare_buffer_spilling.store(true);
+    }
 
     // we map the transaction ID to txn_log_str[ii]; one-to-one
     std::vector<uint64_t> txn_id_cache;
@@ -198,9 +169,8 @@ void LogBuffer::flush_prepare_logs(void)
     {
         log_spill_required = false;
     }
-    // Unlock the buffer after reading and emptying it. We will keep on spilling async.
+    // Unlock the buffer after reading and emptying it
     this->_prepare_buffer_signal->notify_all();
-    unique_buffer_lock.unlock();
 
     for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
     {
@@ -216,23 +186,62 @@ void LogBuffer::flush_prepare_logs(void)
         redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
 #endif
         }
-        // If this was a force spill, exit after spilling
-        // if (force_empty)
-        // {
-        //     return NULL;
-        // }
-    // }
-    // TODO Need to update the txn table based on the txn IDs which are committed
-    return NULL;
+    return;
 }
 
+
+int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std::string data)
+{
+    std::unique_lock<std::mutex> buffer_unique_lock(*(this->_commit_buffer_lock));
+    int ret = 0;
+
+    while (this->_commit_buffer_spilling.load())
+        this->_commit_buffer_signal->wait(buffer_unique_lock);
+
+    // Check If the log requires flushing
+    if (this->_commit_buf_size >= LOG_BUFFER_HW_CAPACITY) {
+        // If the transaction logs already exist in the buffer, since we still have some
+        // space to allow logs, add the log without flushing
+        if (this->_commit_buffer.find(txn_id) == this->_commit_buffer.end()) {
+            // If the txn does not exist in the logs, first flush.
+            std::unique_lock <std::mutex> flush_lock(*(this->_commit_flush_lock));
+            // Recheck the flush conditions to avoid race
+            if (!this->_commit_buffer_spilling.load() &&
+                this->_commit_buf_size >= LOG_BUFFER_HW_CAPACITY) {
+#if DEBUG_PRINT
+            printf("commit Log buffer has %ld transactions, total logs (%ld); "
+                "near High watermark capacity (%d). "
+                "Signalled the log spill thread. Time: %lu\n",
+                this->_commit_buffer.size(), this->_commit_buf_size,
+                LOG_BUFFER_HW_CAPACITY, get_sys_clock());
+#endif
+                    this->_commit_buffer_spilling.store(true);
+                    this->flush_commit_logs();
+                    this->_commit_buffer_spilling.store(false);
+            }
+        }
+    } // The flush_lock is released as the scope is over. Subsequent threads will see that the buffer_size is less than watermark
+
+    std::string status_data = "E"; // Empty status
+    if (status != -1)
+    {
+        status_data = std::to_string(status);
+    }
+    status_data += data;
+    // We still hold the buffer_unique_lock
+    this->_commit_buffer[txn_id].push_back(std::make_pair(node_id, status_data));
+    this->_commit_buf_size++;
+    buffer_unique_lock.unlock();
+    return ret;
+}
+
+// The logs will be of the format txn_id1-nodeid1:msg1|nodeid2:msg2;txn_id2-nodeid1:msg1|nodeid2:msg2;
+// TODO 1. Different types of logs for both phases (?)
 void LogBuffer::flush_commit_logs(void)
 {
-    std::unique_lock<std::mutex> unique_buffer_lock(*(this->_commit_buffer_lock));
-
-    // Lock the mutex and set the spilling flag
-    unique_buffer_lock.lock();
-    this->_commit_buffer_spilling = true;
+    if (!this->_commit_buffer_spilling.load()) {
+        this->_commit_buffer_spilling.store(true);
+    }
 
     // we map the transaction ID to txn_log_str[ii]; one-to-one
     std::vector<uint64_t> txn_id_cache;
@@ -269,7 +278,7 @@ void LogBuffer::flush_commit_logs(void)
     {
         this->_commit_buffer.erase(txn_id_cache[ii]);
     }
-    this->_prepare_buf_size = 0; // all the logs are popped
+    this->_commit_buf_size = 0; // all the logs are popped
 
     this->_commit_buffer_spilling = false;
     this->last_commit_flush_timestamp = get_server_clock();
@@ -282,9 +291,8 @@ void LogBuffer::flush_commit_logs(void)
     {
         log_spill_required = false;
     }
-    // Unlock the buffer after reading and emptying it. We will keep on spilling async.
+    // Unlock the buffer after reading and emptying it
     this->_commit_buffer_signal->notify_all();
-    unique_buffer_lock.unlock();
 
     for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
     {
@@ -300,13 +308,5 @@ void LogBuffer::flush_commit_logs(void)
         redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
 #endif
         }
-        // If this was a force spill, exit after spilling
-        // if (force_empty)
-        // {
-        //     return NULL;
-        // }
-    // }
-    // TODO Need to update the txn table based on the txn IDs which are committed
-    return NULL;
+    return;
 }
-
