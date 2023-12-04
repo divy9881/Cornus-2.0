@@ -9,8 +9,8 @@ SRC_DIRS = ./ ./benchmarks/ ./concurrency_control/ ./storage/ ./system/ ./transp
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
-CFLAGS = -Wno-unknown-pragmas -Wall -g -std=c++14
-INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./transport -I./proto -I./utils -I/users/dspatel6/cpp_redis/includes -I/users/dspatel6/cpp_redis/tacopie/includes/
+CFLAGS = -Wno-unknown-pragmas -Wall -g -std=c++17
+INCLUDE = -I. -I./benchmarks -I./concurrency_control -I./storage -I./system -I./transport -I./proto -I./utils -I$(HOME)/cpp_redis/includes -I$(HOME)/cpp_redis/tacopie/includes/
 # for azure storage
 # INCLUDE += -I/home/kanwu/vcpkg/installed/x64-linux/include
 
@@ -34,19 +34,34 @@ DEPS = $(CPPS:.cpp=.d)
 
 rundb: TARGET=rundb
 rundb: $(OBJS)
+<<<<<<< HEAD
         $(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 runstorage: TARGET=runstorage
 runstorage: $(OBJS)
         $(CC) -no-pie -o $@ $^ $(LDFLAGS)
+=======
+		$(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+runstorage: TARGET=runstorage
+runstorage: $(OBJS)
+		$(CC) -no-pie -o $@ $^ $(LDFLAGS)
+>>>>>>> origin/sahil-cornus
 
 -include $(OBJS:%.o=%.d)
 
 %.d: %.cpp
+<<<<<<< HEAD
         $(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
 
 %.o: %.cpp
         $(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
+=======
+		$(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
+
+%.o: %.cpp
+		$(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
+>>>>>>> origin/sahil-cornus
 
 .PHONY: clean
 clean:

@@ -13,6 +13,7 @@ outputs/*.json
 tools/*.csv
 src/rundb
 src/proto
+src/proto/*
 *.xml
 .idea/workspace.xml
 experiment-setups

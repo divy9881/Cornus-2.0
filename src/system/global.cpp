@@ -6,6 +6,7 @@
 #include "rpc_server.h"
 #include "redis_client.h"
 #include "azure_blob_client.h"
+#include "log_buffer.h"
 
 Stats *             glob_stats;
 Manager *           glob_manager;
@@ -86,6 +87,9 @@ SundialRPCClient *  rpc_client;
 SundialRPCServerImpl * rpc_server;
 RedisClient *       redis_client;
 AzureBlobClient *       azure_blob_client;
+LogBuffer*          LOGGER;
+pthread_t*         log_spiller;
+std::atomic_bool log_spill_required = false;
 
 Transport *     transport;
 //InOutQueue **   input_queues;

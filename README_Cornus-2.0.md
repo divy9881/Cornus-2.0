@@ -8,7 +8,11 @@ $ apt-get install g++ ssh -y
 ### Generate Public-Private key-pair for remote SSH
 ```
 # Create SSH key using ED25519 Cryptographyic Algorithm and CloudLab username
+<<<<<<< HEAD
 $ ssh-keygen -t ed25519 -C "dspatel6"
+=======
+$ ssh-keygen -t ed25519 -C "<identifier>"
+>>>>>>> origin/sahil-cornus
 ```
 
 ### Setup public key in the CloudLab
@@ -62,4 +66,12 @@ $ which grpc_cpp_plugin
 
 # Compile the Cornus source files
 $ ./tools/compile.sh
+
+To use group commits, do the following steps, you have to set the GROUP_COMMITS_ENABLE to true in config.h
+Other tunables for the group commits are as follows:
+DEFAULT_BUFFER_SIZE -> Total count of transaction logs to be retained in the buffer
+EMPTY_LOG_BUFFER_TIMEDELTA -> Total millisecs to wait before flushing
+EMPTY_LOG_BUFFER_HW -> High watermark (in percentage) of the total buffer size after which the data will be scheduled to spill
 ```
+
+ 

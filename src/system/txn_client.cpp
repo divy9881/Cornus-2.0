@@ -31,6 +31,7 @@
 #endif
 #include "redis_client.h"
 #include "azure_blob_client.h"
+#include "log_buffer.h"
 
 
 RC
@@ -86,27 +87,36 @@ TxnManager::process_2pc_phase1()
                 g_log_sz * 8, 'd');
         rpc_log_semaphore->incr();
     #if COMMIT_ALG == ONE_PC
-        #if LOG_DEVICE == LOG_DVC_REDIS
-        redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
-        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_if_ne_data(g_node_id, get_txn_id(), data);
-        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
-        rpc_log_semaphore->wait();
-        sendRemoteLogRequest(PREPARED, num_local_write * g_log_sz * 8,
-                             g_node_id);
-        #endif
+        #if GROUP_COMMITS_ENABLE
+            LOGGER->add_prepare_log(g_node_id, get_txn_id(), -1, data);
+        #else
+            #if LOG_DEVICE == LOG_DVC_REDIS
+            redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
+            #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+            azure_blob_client->log_if_ne_data(g_node_id, get_txn_id(), data);
+            #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+            redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
+            rpc_log_semaphore->wait();
+            sendRemoteLogRequest(PREPARED, num_local_write * g_log_sz * 8,
+                                g_node_id);
+            #endif
+        #endif // GROUP_COMMITS_ENABLE
     #else
-        #if LOG_DEVICE == LOG_DVC_REDIS
-        redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
-        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
-        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
-        rpc_log_semaphore->wait();
-        sendRemoteLogRequest(PREPARED, num_local_write * g_log_sz * 8,
-                             g_node_id);
-        #endif
+        #if GROUP_COMMITS_ENABLE
+            // This is first phase log
+            LOGGER->add_prepare_log(g_node_id, get_txn_id(), PREPARED, data);
+        #else
+            #if LOG_DEVICE == LOG_DVC_REDIS
+            redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
+            #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+            azure_blob_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
+            #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+            redis_client->log_async_data(g_node_id, get_txn_id(), PREPARED, data);
+            rpc_log_semaphore->wait();
+            sendRemoteLogRequest(PREPARED, num_local_write * g_log_sz * 8,
+                                    g_node_id);
+            #endif
+        #endif // GROUP_COMMITS_ENABLE
     #endif // COMMIT_ALG == ONE_PC
     }
 
@@ -216,32 +226,41 @@ TxnManager::process_2pc_phase2(RC rc)
 
     rpc_log_semaphore->incr();
     #if COMMIT_ALG == TWO_PC
+        #if GROUP_COMMITS_ENABLE
+        // TODO have different functions for phase 1 and 2
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
+        #else
         // 2pc: persistent decision
-        #if LOG_DEVICE == LOG_DVC_REDIS
-        redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
-        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
-        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
-        rpc_log_semaphore->wait();
-        sendRemoteLogRequest(rc_to_state(rc), 1, g_node_id, SundialRequest::RESP_OK);
-        #endif
+            #if LOG_DEVICE == LOG_DVC_REDIS
+            redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
+            #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+            azure_blob_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
+            #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+            redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
+            rpc_log_semaphore->wait();
+            sendRemoteLogRequest(rc_to_state(rc), 1, g_node_id, SundialRequest::RESP_OK);
+            #endif
+        #endif // GROUP_COMMITS_ENABLE
         // finish after log is stable.
         rpc_log_semaphore->wait();
         _finish_time = get_sys_clock();
     #elif COMMIT_ALG == ONE_PC
         // finish before sending out logs.
         _finish_time = get_sys_clock();
-        #if LOG_DEVICE == LOG_DVC_REDIS
-        rpc_log_semaphore->incr();
-        redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
-        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
-        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
-        rpc_log_semaphore->wait();
-        sendRemoteLogRequest(rc_to_state(rc), 1, g_node_id,
-                             SundialRequest::RESP_OK);
+        #if GROUP_COMMITS_ENABLE
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), " ");
+        #else
+            #if LOG_DEVICE == LOG_DVC_REDIS
+            rpc_log_semaphore->incr();
+            redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
+            #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+            azure_blob_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
+            #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+            redis_client->log_async(g_node_id, get_txn_id(), rc_to_state(rc));
+            rpc_log_semaphore->wait();
+            sendRemoteLogRequest(rc_to_state(rc), 1, g_node_id,
+                                SundialRequest::RESP_OK);
+            #endif // GROUP_COMMITS_ENABLE
         #endif
     #elif COMMIT_ALG == COORDINATOR_LOG
         // log all at once
@@ -253,14 +272,18 @@ TxnManager::process_2pc_phase2(RC rc)
             }
         }
         // 2pc: persistent decision
-        #if LOG_DEVICE == LOG_DVC_REDIS
-        redis_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
-        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
-        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
-        rpc_log_semaphore->wait();
-        sendRemoteLogRequest(rc_to_state(rc), data.length(), g_node_id, SundialRequest::RESP_OK);
+        #if GROUP_COMMIT_ENABLED
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), data);
+        #else
+            #if LOG_DEVICE == LOG_DVC_REDIS
+            redis_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
+            #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+            azure_blob_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
+            #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+            redis_client->log_async_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
+            rpc_log_semaphore->wait();
+            sendRemoteLogRequest(rc_to_state(rc), data.length(), g_node_id, SundialRequest::RESP_OK);
+            #endif // GROUP_COMMITS_ENABLE
         #endif
         // finish after log is stable.
         rpc_log_semaphore->wait();
