@@ -28,7 +28,7 @@ cd
 git clone https://github.com/redis/redis.git
 cd redis
 make
-cp $HOME/Sundial-Private/tools/redis.conf ./
+cp $HOME/Cornus-2.0/tools/redis.conf ./
 cd
 mkdir redis_data/
 

@@ -116,7 +116,7 @@ class myThread(threading.Thread):
                 return
             self.exec("scp -r {} {}@{}:{};".format(self.homedir, self.usr,
                                                    self.ipaddr, self.homedir))
-            self.remote_exec("cd Sundial-Private; cd tools; "
+            self.remote_exec("cd Cornus-2.0; cd tools; "
                              "./setup_basic.sh; "
                              "./setup_grpc.sh; "
                              "./setup_redis.sh; ")
@@ -175,15 +175,15 @@ class myThread(threading.Thread):
         elif self.cmd == "kill":
             if self.node_id == curr_node_id:
                 return
-            self.remote_exec("cd Sundial-Private; sudo pkill -f rundb")
+            self.remote_exec("cd Cornus-2.0; sudo pkill -f rundb")
         elif self.cmd == "clean_outputs":
             if self.node_id == curr_node_id:
                 return
-            self.remote_exec("cd Sundial-Private/outputs; rm stats.json")
+            self.remote_exec("cd Cornus-2.0/outputs; rm stats.json")
         elif self.cmd == "clean_logs":
             if self.node_id == curr_node_id:
                 return
-            self.remote_exec("cd Sundial-Private; rm -f log_*")
+            self.remote_exec("cd Cornus-2.0; rm -f log_*")
 
 
 if __name__ == "__main__":
