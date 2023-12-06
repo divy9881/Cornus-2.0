@@ -34,34 +34,19 @@ DEPS = $(CPPS:.cpp=.d)
 
 rundb: TARGET=rundb
 rundb: $(OBJS)
-<<<<<<< HEAD
-        $(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 runstorage: TARGET=runstorage
 runstorage: $(OBJS)
-        $(CC) -no-pie -o $@ $^ $(LDFLAGS)
-=======
-		$(CC) -no-pie -o $@ $^ $(LDFLAGS) $(LDLIBS)
-
-runstorage: TARGET=runstorage
-runstorage: $(OBJS)
-		$(CC) -no-pie -o $@ $^ $(LDFLAGS)
->>>>>>> origin/sahil-cornus
+	$(CC) -no-pie -o $@ $^ $(LDFLAGS)
 
 -include $(OBJS:%.o=%.d)
 
 %.d: %.cpp
-<<<<<<< HEAD
-        $(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
+	$(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
 
 %.o: %.cpp
-        $(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
-=======
-		$(CC) -MM -MT $*.o -MF $@ $(CFLAGS) $<
-
-%.o: %.cpp
-		$(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
->>>>>>> origin/sahil-cornus
+	$(CC) $(CPPF) -c $(CFLAGS) -o $@ $<
 
 .PHONY: clean
 clean:
