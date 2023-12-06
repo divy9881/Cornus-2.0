@@ -21,8 +21,8 @@ LDLIB = -lssl -lcrypto -lre2 -lcares
 
 # for redis storage & grpc
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\
-           -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl\
-           -lz -laddress_sorting -lutf8_range_lib -lutf8_validity -lutf8_range -lupb_textformat_lib -lupb_json_lib -lupb_collections_lib -lupb -lutf8_range -lcpp_redis -ltacopie -lssl -lcrypto -lre2 -lcares
+	-Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl\
+	-lz -laddress_sorting -lutf8_range_lib -lutf8_validity -lutf8_range -lupb_textformat_lib -lupb_json_lib -lupb_collections_lib -lupb -lutf8_range -lcpp_redis -ltacopie -lssl -lcrypto -lre2 -lcares
 # for azure storage
 # LDFLAGS += -lcpprest -lboost_system -lboost_log -lboost_log_setup -lboost_thread -lboost_serialization\
 #            -luuid -lxml2 -lz -llzma -lssl -lcrypto -lpthread -ldl
@@ -50,4 +50,4 @@ runstorage: $(OBJS)
 
 .PHONY: clean
 clean:
-        rm -f rundb runstorage $(OBJS) $(DEPS)
+	rm -f rundb runstorage $(OBJS) $(DEPS)
