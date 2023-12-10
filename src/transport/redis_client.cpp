@@ -32,6 +32,7 @@ RedisClient::RedisClient() {
             break;
         }
     }
+    std::cout << "THE LINE TO READ IS : " << line << std::endl;
     std::cout << "[Sundial] connecting to redis server at " << line.substr(0, line.find(" ")) << std::endl;
 	// host, port, timeout, callback ptr, timeout(ms), max_#retry, retry_interval
     for (size_t i = 0; i < g_num_worker_threads; i++) {

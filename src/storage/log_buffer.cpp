@@ -94,12 +94,68 @@ int LogBuffer::add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, st
                 LOG_BUFFER_HW_CAPACITY, get_sys_clock());
 #endif
                     this->_prepare_buffer_spilling.store(true);
-                    this->flush_prepare_logs();
-                    this->_prepare_buffer_spilling.store(false);
-            }
-        }
-    } // The flush_lock is released as the scope is over. Subsequent threads will see that the buffer_size is less than watermark
+                    
+                    std::vector<uint64_t> txn_id_cache;
+                    std::vector<std::string> txn_log_str; // we store one string per transaction ID
 
+                    uint64_t largest_txn_id = 0;                   // Overall largest TXN ID
+                    std::map<uint64_t, uint64_t> node_largest_lsn; // Largest LSN for one particular node
+
+                    for (auto buffer_iterator : this->_prepare_buffer)
+                    {
+                        uint64_t log_txn_id = buffer_iterator.first;
+                        std::vector<std::pair<uint64_t, std::string>> node_id_message_list = buffer_iterator.second;
+                        // Sort on basis of the node id for easier processing of the message later
+                        // std::sort(node_id_message_list.begin(), node_id_message_list.end());
+
+                        // Store the largest LSN for a node
+                        string current_txn_log;
+                        for (auto node_id_msg_iter : node_id_message_list)
+                        {
+                            if (largest_txn_id < log_txn_id)
+                            {
+                                largest_txn_id = log_txn_id;
+                            }
+                            if (node_largest_lsn[node_id_msg_iter.first] < log_txn_id)
+                            {
+                                node_largest_lsn[node_id_msg_iter.first] = log_txn_id;
+                            }
+                            current_txn_log += std::to_string(node_id_msg_iter.first) + ':' + node_id_msg_iter.second + '|';
+                        }
+                        txn_id_cache.push_back(log_txn_id);
+                        txn_log_str.push_back(current_txn_log.substr(0, current_txn_log.size() - 1) + ";");
+                    }
+                    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
+                    {
+                        this->_prepare_buffer.erase(txn_id_cache[ii]);
+                    }
+                    this->_prepare_buf_size = 0; // all the logs are popped
+
+                    this->_prepare_buffer_spilling.store(false);
+                    this->last_prepare_flush_timestamp = get_server_clock();
+                    this->_prepare_buffer_signal->notify_all();
+                    buffer_unique_lock.unlock();
+
+                    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
+                    {
+                        uint64_t txn_id = txn_id_cache[ii];
+                        std::string txn_logs = txn_log_str[ii];
+                        // TODO set the LSN in the txn_table for the transactions
+                        // TODO How to read the logs for one transaction, for one node
+                        #if LOG_DEVICE == LOG_DVC_REDIS
+                            redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+                        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+                            azure_blob_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+                        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+                            redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+                        #endif
+                    }
+                }
+                // It also needs to commit its own lock, so try to acquire this lock again
+                buffer_unique_lock.lock();
+        } // The flush_lock is released as the scope is over. Subsequent threads will see that the buffer_size is less than watermark
+
+    }
     std::string status_data = "E"; // Empty status
     if (status != -1)
     {
@@ -111,82 +167,6 @@ int LogBuffer::add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, st
     this->_prepare_buf_size++;
     buffer_unique_lock.unlock();
     return ret;
-}
-
-// The logs will be of the format txn_id1-nodeid1:msg1|nodeid2:msg2;txn_id2-nodeid1:msg1|nodeid2:msg2;
-// TODO 1. Different types of logs for both phases (?)
-void LogBuffer::flush_prepare_logs(void)
-{
-    if (!this->_prepare_buffer_spilling.load()) {
-        this->_prepare_buffer_spilling.store(true);
-    }
-
-    // we map the transaction ID to txn_log_str[ii]; one-to-one
-    std::vector<uint64_t> txn_id_cache;
-    std::vector<std::string> txn_log_str; // we store one string per transaction ID
-
-    uint64_t largest_txn_id = 0;                   // Overall largest TXN ID
-    std::map<uint64_t, uint64_t> node_largest_lsn; // Largest LSN for one particular node
-
-    for (auto buffer_iterator : this->_prepare_buffer)
-    {
-        uint64_t log_txn_id = buffer_iterator.first;
-        std::vector<std::pair<uint64_t, std::string>> node_id_message_list = buffer_iterator.second;
-        // Sort on basis of the node id for easier processing of the message later
-        // std::sort(node_id_message_list.begin(), node_id_message_list.end());
-
-        // Store the largest LSN for a node
-        string current_txn_log;
-        for (auto node_id_msg_iter : node_id_message_list)
-        {
-            if (largest_txn_id < log_txn_id)
-            {
-                largest_txn_id = log_txn_id;
-            }
-            if (node_largest_lsn[node_id_msg_iter.first] < log_txn_id)
-            {
-                node_largest_lsn[node_id_msg_iter.first] = log_txn_id;
-            }
-            current_txn_log += std::to_string(node_id_msg_iter.first) + ':' + node_id_msg_iter.second + '|';
-        }
-        txn_id_cache.push_back(log_txn_id);
-        txn_log_str.push_back(current_txn_log.substr(0, current_txn_log.size() - 1) + ";");
-    }
-    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
-    {
-        this->_prepare_buffer.erase(txn_id_cache[ii]);
-    }
-    this->_prepare_buf_size = 0; // all the logs are popped
-
-    this->_prepare_buffer_spilling = false;
-    this->last_prepare_flush_timestamp = get_server_clock();
-
-#if DEBUG_PRINT
-    printf("Logs last flushed timestamp %lu\n", this->last_prepare_flush_timestamp);
-#endif
-    // unset the manual spill flag if set
-    if (log_spill_required)
-    {
-        log_spill_required = false;
-    }
-    // Unlock the buffer after reading and emptying it
-    this->_prepare_buffer_signal->notify_all();
-
-    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
-    {
-        uint64_t txn_id = txn_id_cache[ii];
-        std::string txn_logs = txn_log_str[ii];
-// TODO set the LSN in the txn_table for the transactions
-// TODO How to read the logs for one transaction, for one node
-#if LOG_DEVICE == LOG_DVC_REDIS
-        redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
-#elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_async_data(txn_id, largest_txn_id, txn_logs);
-#elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
-#endif
-        }
-    return;
 }
 
 
@@ -216,12 +196,73 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
                 LOG_BUFFER_HW_CAPACITY, get_sys_clock());
 #endif
                     this->_commit_buffer_spilling.store(true);
-                    this->flush_commit_logs();
-                    this->_commit_buffer_spilling.store(false);
-            }
-        }
-    } // The flush_lock is released as the scope is over. Subsequent threads will see that the buffer_size is less than watermark
+                    // we map the transaction ID to txn_log_str[ii]; one-to-one
+                    std::vector<uint64_t> txn_id_cache;
+                    std::vector<std::string> txn_log_str; // we store one string per transaction ID
 
+                    uint64_t largest_txn_id = 0;                   // Overall largest TXN ID
+                    std::map<uint64_t, uint64_t> node_largest_lsn; // Largest LSN for one particular node
+
+                    for (auto buffer_iterator : this->_commit_buffer)
+                    {
+                        uint64_t log_txn_id = buffer_iterator.first;
+                        std::vector<std::pair<uint64_t, std::string>> node_id_message_list = buffer_iterator.second;
+                        // Sort on basis of the node id for easier processing of the message later
+                        // std::sort(node_id_message_list.begin(), node_id_message_list.end());
+
+                        // Store the largest LSN for a node
+                        string current_txn_log;
+                        for (auto node_id_msg_iter : node_id_message_list)
+                        {
+                            if (largest_txn_id < log_txn_id)
+                            {
+                                largest_txn_id = log_txn_id;
+                            }
+                            if (node_largest_lsn[node_id_msg_iter.first] < log_txn_id)
+                            {
+                                node_largest_lsn[node_id_msg_iter.first] = log_txn_id;
+                            }
+                            current_txn_log += std::to_string(node_id_msg_iter.first) + ':' + node_id_msg_iter.second + '|';
+                        }
+                        txn_id_cache.push_back(log_txn_id);
+                        txn_log_str.push_back(current_txn_log.substr(0, current_txn_log.size() - 1) + ";");
+                    }
+                    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
+                    {
+                        this->_commit_buffer.erase(txn_id_cache[ii]);
+                    }
+                    this->_commit_buf_size = 0; // all the logs are popped
+
+                    this->_commit_buffer_spilling = false;
+                    this->last_commit_flush_timestamp = get_server_clock();
+
+                #if DEBUG_PRINT
+                    printf("Logs last flushed timestamp %lu\n", this->last_commit_flush_timestamp);
+                #endif
+                    // unset the manual spill flag if set
+                    this->_commit_buffer_spilling.store(false);
+                    this->_commit_buffer_signal->notify_all();
+                    buffer_unique_lock.unlock();
+
+                    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
+                    {
+                        uint64_t txn_id = txn_id_cache[ii];
+                        std::string txn_logs = txn_log_str[ii];
+                        // TODO set the LSN in the txn_table for the transactions
+                        // TODO How to read the logs for one transaction, for one node
+                        #if LOG_DEVICE == LOG_DVC_REDIS
+                                redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+                        #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
+                                azure_blob_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+                        #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
+                                redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
+                        #endif
+                    }
+                    // The current thread also needs to flush its own logs
+                    buffer_unique_lock.lock();
+            }
+        } // The flush_lock is released as the scope is over. Subsequent threads will see that the buffer_size is less than watermark
+    }
     std::string status_data = "E"; // Empty status
     if (status != -1)
     {
@@ -243,70 +284,6 @@ void LogBuffer::flush_commit_logs(void)
         this->_commit_buffer_spilling.store(true);
     }
 
-    // we map the transaction ID to txn_log_str[ii]; one-to-one
-    std::vector<uint64_t> txn_id_cache;
-    std::vector<std::string> txn_log_str; // we store one string per transaction ID
-
-    uint64_t largest_txn_id = 0;                   // Overall largest TXN ID
-    std::map<uint64_t, uint64_t> node_largest_lsn; // Largest LSN for one particular node
-
-    for (auto buffer_iterator : this->_commit_buffer)
-    {
-        uint64_t log_txn_id = buffer_iterator.first;
-        std::vector<std::pair<uint64_t, std::string>> node_id_message_list = buffer_iterator.second;
-        // Sort on basis of the node id for easier processing of the message later
-        // std::sort(node_id_message_list.begin(), node_id_message_list.end());
-
-        // Store the largest LSN for a node
-        string current_txn_log;
-        for (auto node_id_msg_iter : node_id_message_list)
-        {
-            if (largest_txn_id < log_txn_id)
-            {
-                largest_txn_id = log_txn_id;
-            }
-            if (node_largest_lsn[node_id_msg_iter.first] < log_txn_id)
-            {
-                node_largest_lsn[node_id_msg_iter.first] = log_txn_id;
-            }
-            current_txn_log += std::to_string(node_id_msg_iter.first) + ':' + node_id_msg_iter.second + '|';
-        }
-        txn_id_cache.push_back(log_txn_id);
-        txn_log_str.push_back(current_txn_log.substr(0, current_txn_log.size() - 1) + ";");
-    }
-    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
-    {
-        this->_commit_buffer.erase(txn_id_cache[ii]);
-    }
-    this->_commit_buf_size = 0; // all the logs are popped
-
-    this->_commit_buffer_spilling = false;
-    this->last_commit_flush_timestamp = get_server_clock();
-
-#if DEBUG_PRINT
-    printf("Logs last flushed timestamp %lu\n", this->last_commit_flush_timestamp);
-#endif
-    // unset the manual spill flag if set
-    if (log_spill_required)
-    {
-        log_spill_required = false;
-    }
-    // Unlock the buffer after reading and emptying it
-    this->_commit_buffer_signal->notify_all();
-
-    for (uint32_t ii = 0; ii < txn_id_cache.size(); ii++)
-    {
-        uint64_t txn_id = txn_id_cache[ii];
-        std::string txn_logs = txn_log_str[ii];
-// TODO set the LSN in the txn_table for the transactions
-// TODO How to read the logs for one transaction, for one node
-#if LOG_DEVICE == LOG_DVC_REDIS
-        redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
-#elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
-        azure_blob_client->log_async_data(txn_id, largest_txn_id, txn_logs);
-#elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
-        redis_client->log_async_data(txn_id, largest_txn_id, txn_logs);
-#endif
-        }
+    
     return;
 }
