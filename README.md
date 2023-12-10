@@ -218,5 +218,5 @@ In file included from ./proto/sundial.grpc.pb.h:7,
       |  ^~~~~
 ```
 Solution:
-Run the script to generate proto manually:
-`./setup\_proto.sh \<path\_to\_repo\>/src/proto \<path\_to\_repo\>\tools`
+Run the script to generate proto manually:  
+`./setup_proto.sh <path_to_repo>/src/proto <path_to_repo>/tools`

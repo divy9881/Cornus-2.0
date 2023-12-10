@@ -30,6 +30,7 @@
 #endif
 #include "redis_client.h"
 #include "azure_blob_client.h"
+#include "log_buffer.h"
 
 
 // RPC Server
@@ -81,7 +82,11 @@ TxnManager::process_prepare_request(const SundialRequest* request,
         thd_id = request->thd_id();
         #if LOG_DEVICE == LOG_DVC_REDIS
             #if COMMIT_ALG == ONE_PC
-            redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
+                #if GROUP_COMMITS_ENABLE
+                    LOGGER->add_prepare_log(g_node_id, get_txn_id(), -1, data);
+                #else
+                    redis_client->log_if_ne_data(g_node_id, get_txn_id(), data);
+                #endif
             #else
                 #if GROUP_COMMITS_ENABLE
                 LOGGER->add_prepare_log(g_node_id, get_txn_id(), PREPARED, data);
