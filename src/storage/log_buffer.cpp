@@ -282,7 +282,7 @@ void LogBuffer::flush_prepare_logs(void) {
     std::unique_lock<std::mutex> buffer_unique_lock(*(this->_prepare_buffer_lock), std::defer_lock);
     // Wait until there's something to flush or it's time to wake up
     this->prepare_buffer_condition->wait_for(buffer_unique_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
-        return !this->prepare_flush_thread_running;
+        return !this->prepare_flush_thread_running || !this->_prepare_buffer.empty();
     });
 
     if (!this->_prepare_buffer.empty()) {
@@ -370,7 +370,7 @@ void LogBuffer::flush_commit_logs() {
     std::unique_lock<std::mutex> buffer_unique_lock(*(this->_commit_buffer_lock), std::defer_lock);
     // Wait until there's something to flush or it's time to wake up
     this->commit_buffer_condition->wait_for(buffer_unique_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
-        return !this->commit_flush_thread_running;
+        return !this->commit_flush_thread_running | !this->_commit_buffer.empty()
     });
 
     if (!this->_commit_buffer.empty()) {
