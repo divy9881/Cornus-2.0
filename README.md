@@ -92,7 +92,7 @@ Open ```redis.conf``` to setup of Redis:
 
 on Master
 - change bind to bind 0.0.0.0 -::1 OR comment out bind to use default
-- set up ```protected-mode``` (e.g. password), you can use ```protected-mode 
+- set up ```protected-mode``` (e.g. password), you can use ```protected-mode```
   no``` but it is dangerous for public cloud without setting ```requirepass```
 - set ```appendonly yes```
 - set ```appendfsync always```
