@@ -18,6 +18,7 @@ LogBuffer::LogBuffer()
     this->_prepare_buffer_lock = new std::mutex;
     this->_prepare_flush_lock = new std::mutex;
     this->_prepare_buffer_signal = new std::condition_variable;
+    this->prepare_buffer_condition = new std::condition_variable;
     log_spill_required = false;
     this->_prepare_buf_size = 0;
 
@@ -29,6 +30,7 @@ LogBuffer::LogBuffer()
     this->_commit_flush_lock = new std::mutex;
     this->_commit_buffer_signal = new std::condition_variable;
     this->_commit_buf_size = 0;
+    this->commit_buffer_condition = new std::condition_variable;
 }
 
 LogBuffer::~LogBuffer()
@@ -279,8 +281,8 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
 void LogBuffer::flush_prepare_logs(void) {
 
     // Wait until there's something to flush or it's time to wake up
-    _prepare_buffer_signal.wait_for(lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
-        return !prepare_flush_thread_running;
+    this->prepare_buffer_condition.wait_for(this->_prepare_buffer_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
+        return !this->prepare_flush_thread_running;
     });
 
     if (!this->_prepare_buffer.empty()) {
@@ -366,8 +368,8 @@ void LogBuffer::flush_prepare_logs(void) {
 
 void LogBuffer::flush_commit_logs() {
     // Wait until there's something to flush or it's time to wake up
-    buffer_condition.wait_for(lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
-        return !commit_flush_thread_running;
+    this->commit_buffer_condition.wait_for(this->_commit_buffer_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
+        return !this->commit_flush_thread_running;
     });
 
     if (!this->_commit_buffer.empty()) {
@@ -453,25 +455,25 @@ void LogBuffer::flush_commit_logs() {
 
 void LogBuffer::start_prepare_flush_thread() {
     if (!this->prepare_flush_thread_running) {
-        prepare_flush_thread_running = true;
+        this->prepare_flush_thread_running = true;
         std::thread(&LogBuffer::flush_prepare_logs, this).detach();
     }
 }
 
 void LogBuffer::stop_prepare_flush_thread() {
-    prepare_flush_thread_running = false;
+    this->prepare_flush_thread_running = false;
     // Notify the flush thread in case it's waiting for new logs
-    prepare_buffer_condition.notify_one();
+    this->prepare_buffer_condition.notify_one();
 }
 
 void LogBuffer::stop_commit_flush_thread() {
-    commit_flush_thread_running = false;
-    commit_buffer_condition.notify_one();
+    this->commit_flush_thread_running = false;
+    this->commit_buffer_condition.notify_one();
 }
 
 void LogBuffer::start_commit_flush_thread() {
     if (!this->commit_flush_thread_running) {
-        commit_flush_thread_running = true;
+        this->commit_flush_thread_running = true;
         std::thread(&LogBuffer::flush_commit_logs, this).detach();
     }
 }

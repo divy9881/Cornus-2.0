@@ -55,7 +55,8 @@ int main(int argc, char* argv[])
     #if GROUP_COMMITS_ENABLE
         LOGGER = new LogBuffer;
         struct spiller_args *args = new struct spiller_args;
-        LOGGER.start
+        LOGGER->start_commit_flush_thread();
+        LOGGER->start_prepare_flush_thread();
         args->logger_instance = LOGGER;
         args->force = false;
         // log_spiller = new pthread_t;
