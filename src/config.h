@@ -8,7 +8,7 @@
 #define NODE_TYPE                       COMPUTE_NODE
 
 // Number of server threads on each node
-#define NUM_WORKER_THREADS              1024 //4096 //2048 //1024
+#define NUM_WORKER_THREADS              512 //4096 //2048 //1024
 #define NUM_RPC_SERVER_THREADS          24
 
 // Statistics
@@ -23,7 +23,7 @@
 
 // WORKLOAD can be YCSB or TPCC
 #define WORKLOAD                        TPCC
-#define RUN_TIME                        10 // in second
+#define RUN_TIME                        20 // in second
 
 // Debugging
 #define DEBUG_PRINT                     false
@@ -101,7 +101,7 @@
 #define LOG_SIZE_PER_WRITE              32 // in bytes
 #define LOG_TLS_REDIS                   false // if redis needs tls tunnel
 #define AZURE_ISOLATION_ENABLE          true
-#define GROUP_COMMITS_ENABLE            true // Group the commit logs and flush once
+#define GROUP_COMMITS_ENABLE            false // Group the commit logs and flush once
 // Group commit logging parameters
 #define DEFAULT_BUFFER_SIZE             5000
 #define EMPTY_LOG_BUFFER_TIMEDELTA      300 // 300ms
@@ -154,7 +154,7 @@
 
 // Distributed DBMS
 // ================
-#define COMMIT_ALG                      ONE_PC
+#define COMMIT_ALG                      TWO_PC
 #define COMMIT_VAR                      NO_VARIANT
 #define DEBUG_LOG                       false
 
