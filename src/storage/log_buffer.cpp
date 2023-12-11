@@ -279,13 +279,14 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
 }
 
 void LogBuffer::flush_prepare_logs(void) {
-
+    std::unique_lock<std::mutex> buffer_unique_lock(*(this->_prepare_buffer_lock), std::defer_lock);
     // Wait until there's something to flush or it's time to wake up
-    this->prepare_buffer_condition->wait_for(this->_prepare_buffer_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
+    this->prepare_buffer_condition->wait_for(buffer_unique_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
         return !this->prepare_flush_thread_running;
     });
 
     if (!this->_prepare_buffer.empty()) {
+        buffer_unique_lock.lock();
         std::unique_lock<std::mutex> buffer_unique_lock(this->_prepare_buffer_lock);
         // Process and flush the prepare_buffer
         // std::cout << "Flushing " << prepare_buffer.size() << " items\n";
@@ -367,13 +368,14 @@ void LogBuffer::flush_prepare_logs(void) {
 }
 
 void LogBuffer::flush_commit_logs() {
+    std::unique_lock<std::mutex> buffer_unique_lock(*(this->_commit_buffer_lock), std::defer_lock);
     // Wait until there's something to flush or it's time to wake up
-    this->commit_buffer_condition->wait_for(this->_commit_buffer_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
+    this->commit_buffer_condition->wait_for(buffer_unique_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
         return !this->commit_flush_thread_running;
     });
 
     if (!this->_commit_buffer.empty()) {
-        std::unique_lock<std::mutex> buffer_unique_lock(this->_commit_buffer_lock);
+        buffer_unique_lock.lock();
         // Process and flush the commit_buffer
         // std::cout << "Flushing " << commit_buffer.size() << " items\n";
         std::unique_lock <std::mutex> flush_lock(*(this->_commit_flush_lock));
