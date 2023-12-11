@@ -169,6 +169,8 @@ int main(int argc, char* argv[])
     glob_manager->active = false;
 #if GROUP_COMMITS_ENABLE
     // pthread_cancel(*log_spiller);
+    LOGGER->stop_commit_flush_thread();
+    LOGGER->stop_prepare_flush_thread();
     delete LOGGER;
     delete args;
 #endif
