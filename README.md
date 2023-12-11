@@ -27,7 +27,7 @@ Setup Compute Node
   - first line: user name
   - second line: absolute path to the repository
 
-### Step 1: Setup SSH Key Authorization Locally
+### Step 1: Setup SSH Key Authorization Locally 
 
 - assume there's a public key at <root>/.ssh/id_ed25519.pub
   - generate ssh key [link](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
@@ -120,7 +120,7 @@ Configuration & Execution
 - For each compute node, do the follow:
 ```
 ./tools/compile.sh
-./tools/run.sh -Gn<node_id>
+./src/rundb -Gn<node_id>
 ```
 
 ### Batch Tests for Experiments
