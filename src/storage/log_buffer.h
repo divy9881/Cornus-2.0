@@ -57,6 +57,10 @@ public:
     void print();
     void flush_prepare_logs();
     void flush_commit_logs();
+    void start_prepare_flush_thread();
+    void start_commit_flush_thread();
+    void stop_prepare_flush_thread();
+    void stop_commit_flush_thread();
 };
 
 // void * flush_prepare_logs(void* args);
