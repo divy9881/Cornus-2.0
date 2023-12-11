@@ -287,10 +287,9 @@ void LogBuffer::flush_prepare_logs(void) {
 
     if (!this->_prepare_buffer.empty()) {
         buffer_unique_lock.lock();
-        std::unique_lock<std::mutex> buffer_unique_lock(this->_prepare_buffer_lock);
         // Process and flush the prepare_buffer
         // std::cout << "Flushing " << prepare_buffer.size() << " items\n";
-        std::unique_lock <std::mutex> flush_lock(*(this->_commit_flush_lock));
+        std::unique_lock <std::mutex> flush_lock(*(this->_prepare_flush_lock));
             // Recheck the flush conditions to avoid race
         if (!this->_prepare_buffer_spilling.load() &&
             this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY) {
