@@ -129,19 +129,24 @@ int LogBuffer::add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std
 void LogBuffer::flush_prepare_logs(void) {
     pthread_mutex_lock(&_prepare_buffer_lock);
 
-    prepare_buffer_condition.wait_for(_prepare_buffer_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
+    timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += EMPTY_LOG_BUFFER_TIMEDELTA / 1000;  // Convert milliseconds to seconds
+    ts.tv_nsec += (EMPTY_LOG_BUFFER_TIMEDELTA % 1000) * 1000000;  // Convert remainder to nanoseconds
+
+    if (pthread_cond_timedwait(&_prepare_buffer_signal, &_prepare_buffer_lock, &ts) == ETIMEDOUT) {
         return !this->prepare_flush_thread_running || !this->_prepare_buffer.empty();
-    });
+    }
 
     if (!this->_prepare_buffer.empty()) {
         pthread_mutex_lock(&_prepare_flush_lock);
+        std::vector<uint64_t> txn_id_cache;
+        std::vector<std::string> txn_log_str;
+        uint64_t largest_txn_id = 0;
+        std::map<uint64_t, uint64_t> node_largest_lsn;
+
         if (!this->_prepare_buffer_spilling.load() && this->_prepare_buf_size >= LOG_BUFFER_HW_CAPACITY) {
             this->_prepare_buffer_spilling.store(true);
-
-            std::vector<uint64_t> txn_id_cache;
-            std::vector<std::string> txn_log_str;
-            uint64_t largest_txn_id = 0;
-            std::map<uint64_t, uint64_t> node_largest_lsn;
 
             for (auto buffer_iterator : this->_prepare_buffer) {
                 uint64_t log_txn_id = buffer_iterator.first;
@@ -191,19 +196,22 @@ void LogBuffer::flush_prepare_logs(void) {
 void LogBuffer::flush_commit_logs() {
     pthread_mutex_lock(&_commit_buffer_lock);
 
-    commit_buffer_condition.wait_for(_commit_buffer_lock, std::chrono::milliseconds(EMPTY_LOG_BUFFER_TIMEDELTA), [&] {
-        return !this->commit_flush_thread_running || !this->_commit_buffer.empty();
-    });
+    timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += EMPTY_LOG_BUFFER_TIMEDELTA / 1000;  // Convert milliseconds to seconds
+    ts.tv_nsec += (EMPTY_LOG_BUFFER_TIMEDELTA % 1000) * 1000000;  // Convert remainder to nanoseconds
 
+    if (pthread_cond_timedwait(&_commit_buffer_signal, &_commit_buffer_lock, &ts) == ETIMEDOUT) {
+        return !this->commit_flush_thread_running || !this->_commit_buffer.empty();
+    }
     if (!this->_commit_buffer.empty()) {
         pthread_mutex_lock(&_commit_flush_lock);
+        std::vector<uint64_t> txn_id_cache;
+        std::vector<std::string> txn_log_str;
+        uint64_t largest_txn_id = 0;
+        std::map<uint64_t, uint64_t> node_largest_lsn;
         if (!this->_commit_buffer_spilling.load() && this->_commit_buf_size >= LOG_BUFFER_HW_CAPACITY) {
             this->_commit_buffer_spilling.store(true);
-
-            std::vector<uint64_t> txn_id_cache;
-            std::vector<std::string> txn_log_str;
-            uint64_t largest_txn_id = 0;
-            std::map<uint64_t, uint64_t> node_largest_lsn;
 
             for (auto buffer_iterator : this->_commit_buffer) {
                 uint64_t log_txn_id = buffer_iterator.first;
@@ -260,12 +268,13 @@ void LogBuffer::start_prepare_flush_thread() {
 
 void LogBuffer::stop_prepare_flush_thread() {
     this->prepare_flush_thread_running = false;
-    this->prepare_buffer_condition.notify_one();
+    pthread_cond_signal(&this->prepare_buffer_condition);
 }
 
 void LogBuffer::stop_commit_flush_thread() {
     this->commit_flush_thread_running = false;
-    this->commit_buffer_condition.notify_one();
+    pthread_cond_signal(&this->commit_buffer_condition);
+    // this->commit_buffer_condition.notify_one();
 }
 
 void LogBuffer::start_commit_flush_thread() {
