@@ -1,0 +1,602 @@
+=Worker Thread=
+=Worker Thread=
+    Throughput:                   4887.35
+    TPS (TPC-C):                  1632.85
+    run_time:                     5121.73
+    dist_txn_latency:             439.399
+    time_process_txn:             0
+    time_idle:                    0
+    time_write_output_queue:      0
+    log_size:                     0
+    bytes_sent:                   0
+    dummy_bytes_sent:             0
+    time_send_msg:                0
+    time_read_queue:              0
+    time_output_idle:             0
+    Throughput:                   4684.23
+    TPS (TPC-C):                  1556.31
+    run_time:                     5121.6
+    dist_txn_latency:             467.664
+    time_process_txn:             0
+    time_idle:                    0
+    time_write_output_queue:      0
+    log_size:                     0
+    bytes_sent:                   0
+    dummy_bytes_sent:             0
+    bytes_received:               0
+    time_recv_msg:                0
+    time_write_queue:             0
+    time_input_idle:              0
+    logging_send_time:            0
+    logging_commit_time:          0
+    single_part_execute_phase (in us) :34.4362
+    single_part_precommit_phase (in us) :0
+    single_part_log_latency (in us) :0
+    single_part_commit_phase (in us) :6419.32
+    single_part_abort (in us) :   89349.2
+    multi_part_execute_phase (in us) :257.711
+    time_send_msg:                0
+    time_read_queue:              0
+    time_output_idle:             0
+    bytes_received:               0
+    time_recv_msg:                0
+    time_write_queue:             0
+    time_input_idle:              0
+    logging_send_time:            0
+    logging_commit_time:          0
+    single_part_execute_phase (in us) :34.642
+    single_part_precommit_phase (in us) :0
+    single_part_log_latency (in us) :0
+    single_part_commit_phase (in us) :6731.1
+    single_part_abort (in us) :   92457.8
+    multi_part_execute_phase (in us) :261.372
+    multi_part_precommit_phase (in us) :0
+    multi_part_prepare_phase (in us) :3037
+    multi_part_commit_phase (in us) :1484.97
+    multi_part_abort (in us) :    189107
+    multi_part_cleanup_phase (in us) :2031.26
+    terminate_time:               0
+    log_ready_time:               0
+    dependency_ready_time:        0
+    CC (row):                     0
+    CC (index):                   0
+    logic:                        0
+    wait:                         0
+    network:                      0
+    multi_part_precommit_phase (in us) :0
+    multi_part_prepare_phase (in us) :2927.38
+    multi_part_commit_phase (in us) :1440.47
+    multi_part_abort (in us) :    166546
+    multi_part_cleanup_phase (in us) :2118.36
+    terminate_time:               0
+    log_ready_time:               0
+    dependency_ready_time:        0
+    CC (row):                     0
+    CC (index):                   0
+    logic:                        0
+    wait:                         0
+    network:                      0
+    cache:                        0
+    time_debug1:                  0
+    time_debug2:                  0
+    time_debug3:                  0
+    time_debug4:                  0
+    time_rpc:                     0.000423896
+    time_debug6:                  0
+    time_debug7:                  444.837
+    log_if_ne:                    0
+    log_if_ne_iso:                0
+    log_if_ne_data:               0
+    cache:                        0
+    time_debug1:                  0
+    time_debug2:                  0
+    time_debug3:                  0
+    time_debug4:                  0
+    time_rpc:                     0.000420667
+    time_debug6:                  0
+    time_debug7:                  472.564
+    log_if_ne:                    0
+    log_if_ne_iso:                0
+    log_if_ne_data:               0
+    log_if_ne_data_iso:           0
+    log_sync:                     0
+    log_sync_data:                315.212
+    log_sync_data_iso:            0
+    log_async:                    20.7587
+    log_async_data:               0
+    log_async_data_iso:           0
+
+    average_DummyReply_req_latency:221.844
+    max_DummyReply_req_latency:1652.53
+    min_DummyReply_req_latency:0
+    log_if_ne_data_iso:           0
+    log_sync:                     0
+    log_sync_data:                313.128
+    log_sync_data_iso:            0
+    log_async:                    20.0376
+    log_async_data:               0
+    log_async_data_iso:           0
+
+    average_DummyReply_req_latency:217.108
+    max_DummyReply_req_latency:1978.43
+    min_DummyReply_req_latency:0
+    average_READ_REQ_req_latency:-nan
+    max_READ_REQ_req_latency:0
+    min_READ_REQ_req_latency:0
+    average_PREPARE_REQ_req_latency:-nan
+    max_PREPARE_REQ_req_latency:0
+    min_PREPARE_REQ_req_latency:0
+    average_COMMIT_REQ_req_latency:2017.84
+    max_COMMIT_REQ_req_latency:10313.4
+    min_COMMIT_REQ_req_latency:0
+    average_ABORT_REQ_req_latency:-nan
+    max_ABORT_REQ_req_latency:0
+    min_ABORT_REQ_req_latency:0
+    average_SYS_REQ_req_latency:-nan
+    max_SYS_REQ_req_latency:0
+    min_SYS_REQ_req_latency:0
+    average_TERMINATE_REQ_req_latency:2109.35
+    max_TERMINATE_REQ_req_latency:6648.63
+    min_TERMINATE_REQ_req_latency:0
+    average_PAXOS_LOG_req_latency:-nan
+    max_PAXOS_LOG_req_latency:0
+    min_PAXOS_LOG_req_latency:0
+    average_READ_REQ_req_latency:-nan
+    max_READ_REQ_req_latency:0
+    min_READ_REQ_req_latency:0
+    average_PREPARE_REQ_req_latency:-nan
+    max_PREPARE_REQ_req_latency:0
+    min_PREPARE_REQ_req_latency:0
+    average_COMMIT_REQ_req_latency:2003.66
+    max_COMMIT_REQ_req_latency:16656.8
+    min_COMMIT_REQ_req_latency:0
+    average_ABORT_REQ_req_latency:-nan
+    max_ABORT_REQ_req_latency:0
+    min_ABORT_REQ_req_latency:0
+    average_SYS_REQ_req_latency:-nan
+    max_SYS_REQ_req_latency:0
+    min_SYS_REQ_req_latency:0
+    average_TERMINATE_REQ_req_latency:2020.64
+    max_TERMINATE_REQ_req_latency:8188.54
+    min_TERMINATE_REQ_req_latency:0
+    average_PAXOS_LOG_req_latency:-nan
+    max_PAXOS_LOG_req_latency:0
+    min_PAXOS_LOG_req_latency:0
+    average_PAXOS_LOG_FORWARD_req_latency:0
+    max_PAXOS_LOG_FORWARD_req_latency:0
+    min_PAXOS_LOG_FORWARD_req_latency:0
+    average_PAXOS_LOG_COLOCATE_req_latency:0
+    max_PAXOS_LOG_COLOCATE_req_latency:0
+    min_PAXOS_LOG_COLOCATE_req_latency:0
+    average_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    max_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    min_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    average_PAXOS_REPLICATE_req_latency:0
+    max_PAXOS_REPLICATE_req_latency:0
+    min_PAXOS_REPLICATE_req_latency:0
+    average_PAXOS_LOG_FORWARD_req_latency:0
+    max_PAXOS_LOG_FORWARD_req_latency:0
+    min_PAXOS_LOG_FORWARD_req_latency:0
+    average_PAXOS_LOG_COLOCATE_req_latency:0
+    max_PAXOS_LOG_COLOCATE_req_latency:0
+    min_PAXOS_LOG_COLOCATE_req_latency:0
+    average_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    max_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    min_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    average_PAXOS_REPLICATE_req_latency:0
+    max_PAXOS_REPLICATE_req_latency:0
+    min_PAXOS_REPLICATE_req_latency:0
+    average_log_sync_data: 7248.58
+    average_log_async: 2033.97
+    average_prepare_req_cnt:      1.00498
+    average_prepare_req_size:     991.323
+    average_prepare_resp_cnt:     1.00498
+    average_log_sync_data: 6913.38
+    average_log_async: 1937.31
+    average_prepare_req_cnt:      1.00623
+    average_prepare_req_size:     987.926
+    average_prepare_resp_cnt:     1.00623
+    average_prepare_resp_size:    742.464
+    average_node_communicate:     211.948
+    average_dist_latency:         0.171172
+    average_dist_total_time:      0.17329
+    average_latency:              0.0997603
+    90%_latency:                  0.301586
+    95%_latency:                  0.594387
+    99%_latency:                  1.33688
+    max_latency:                  4.92184
+    90%_dist_latency:             0.54749
+    95%_dist_latency:             0.872387
+    99%_dist_latency:             1.66839
+    max_dist_latency:             3.57288
+    num_commits:                  48890
+    num_aborts:                   947905
+    num_precommits:               0
+    num_waits:                    0
+    num_single_part_txn:          46323
+    num_multi_part_txn:           2567
+    num_aborts_restart:           947740
+    num_aborts_terminate:         165
+    num_aborts_local:             947905
+    num_aborts_remote:            0
+    num_affected_txn:             0
+    log_num:                      0
+    msg_cnt:                      0
+    msg_size:                     0
+    num_renewals:                 0
+    num_no_need_to_renewal:       0
+    num_cache_bypass:             0
+    num_cache_reads:              0
+    num_cache_hits:               0
+    num_cache_misses:             0
+    num_cache_remove:             0
+    num_cache_inserts:            0
+    num_cache_updates:            0
+    num_cache_evictions:          0
+    num_local_hits:               0
+    num_renew:                    0
+    num_renew_success:            0
+    num_renew_failure:            0
+    num_ro_read:                  0
+    num_ro_check:                 0
+    num_rw_read:                  0
+    num_rw_check:                 0
+    int_debug1:                   0
+    int_debug2:                   0
+    num_prepare:                  2567
+    int_debug4:                   0
+    int_debug5:                   0
+    int_debug6:                   0
+    int_urgentwrite:              0
+    int_aborts_rs1:               0
+    int_aborts_rs2:               0
+    int_aborts_rs3:               0
+    int_aborts_ws1:               0
+    int_aborts_ws2:               0
+    int_saved_by_histnum_log_if_ne:0
+    num_log_if_ne_iso:            0
+    num_log_if_ne_data:           0
+    num_log_if_ne_data_iso:       0
+    num_log_sync:                 0
+    num_log_sync_data:            0
+    num_log_sync_data_iso:        45293
+    num_log_async:                0
+    num_log_async_data:           10343
+    num_log_async_data_iso:       0
+    :                             0
+TPCC Per Txn Type Commits/Aborts
+    Txn Name          Commits     Aborts      Time
+    Payment           15159       895751      4385.46
+    New Order         16334       46395       355.434
+    Order Status      1401        1           0.0275759
+    Delivery          14534       5142        132.592
+    Stock Level       1462        616         3.76425
+=RPC Messages=
+    Request Types     # msgs      # bytes
+    DummyReply        0           0
+    READ_REQ          0           0
+    PREPARE_REQ       2583        2536007
+    COMMIT_REQ        2583        2536007
+    ABORT_REQ         16          3584
+    SYS_REQ           0           0
+    TERMINATE_REQ     0           0
+    PAXOS_LOG         0           0
+    average_prepare_resp_size:    746.613
+    average_node_communicate:     210.333
+    average_dist_latency:         0.193891
+    average_dist_total_time:      0.195922
+    average_latency:              0.104097
+    90%_latency:                  0.300884
+    95%_latency:                  0.619743
+    99%_latency:                  1.48923
+    max_latency:                  5.57507
+    90%_dist_latency:             0.60117
+    95%_dist_latency:             0.974806
+    99%_dist_latency:             1.8618
+    max_dist_latency:             4.02635
+    num_commits:                  46857
+    num_aborts:                   947477
+    num_precommits:               0
+    num_waits:                    0
+    num_single_part_txn:          44445
+    num_multi_part_txn:           2412
+    num_aborts_restart:           947319
+    num_aborts_terminate:         158
+    num_aborts_local:             947477
+    num_aborts_remote:            0
+    num_affected_txn:             0
+    log_num:                      0
+    msg_cnt:                      0
+    msg_size:                     0
+    num_renewals:                 0
+    num_no_need_to_renewal:       0
+    num_cache_bypass:             0
+    num_cache_reads:              0
+    num_cache_hits:               0
+    num_cache_misses:             0
+    num_cache_remove:             0
+    num_cache_inserts:            0
+    num_cache_updates:            0
+    num_cache_evictions:          0
+    num_local_hits:               0
+    num_renew:                    0
+    num_renew_success:            0
+    num_renew_failure:            0
+    num_ro_read:                  0
+    num_ro_check:                 0
+    num_rw_read:                  0
+    num_rw_check:                 0
+    int_debug1:                   0
+    int_debug2:                   0
+    num_prepare:                  2412
+    int_debug4:                   0
+    int_debug5:                   0
+    int_debug6:                   0
+    int_urgentwrite:              0
+    int_aborts_rs1:               0
+    int_aborts_rs2:               0
+    int_aborts_rs3:               0
+    int_aborts_ws1:               0
+    int_aborts_ws2:               0
+    int_saved_by_histnum_log_if_ne:0
+    num_log_if_ne_iso:            0
+    num_log_if_ne_data:           0
+    num_log_if_ne_data_iso:       0
+    num_log_sync:                 0
+    num_log_sync_data:            0
+    num_log_sync_data_iso:        43486
+    num_log_async:                0
+    num_log_async_data:           10206
+    num_log_async_data_iso:       0
+    :                             0
+TPCC Per Txn Type Commits/Aborts
+    Txn Name          Commits     Aborts      Time
+    Payment           14519       898761      4402.09
+    New Order         15568       42825       336.853
+    Order Status      1362        0           0.0208048
+    Delivery          13993       5179        134.59
+    Stock Level       1415        712         4.1
+=RPC Messages=
+    Request Types     # msgs      # bytes
+    DummyReply        0           0
+    READ_REQ          0           0
+    PAXOS_LOG_FORWARD 0           0
+=Worker Thread=
+    Throughput:                   5459.45
+    TPS (TPC-C):                  1806.69
+    run_time:                     5121.73
+    dist_txn_latency:             442.106
+    time_process_txn:             0
+    time_idle:                    0
+    time_write_output_queue:      0
+    log_size:                     0
+    bytes_sent:                   0
+    dummy_bytes_sent:             0
+    time_send_msg:                0
+    PAXOS_LOG_COLOCATE0           0
+    PAXOS_LOG_COLOCATE_FORWARD0           0
+    PAXOS_REPLICATE   0           0
+
+    Response Types    # msgs      # bytes
+    RESP_OK           2622        1924775
+    RESP_ABORT        0           0
+    RESP_FAIL         0           0
+    PREPARED_OK       2583        1905905
+    PREPARED_OK_RO    0           0
+    PREPARED_ABORT    0           0
+    ACK               2599        1914385
+    SYS_RESP          0           0
+    PREPARE_REQ       2424        2391070
+    COMMIT_REQ        2424        2391070
+    ABORT_REQ         8           1792
+    SYS_REQ           0           0
+    TERMINATE_REQ     0           0
+    PAXOS_LOG         0           0
+    PAXOS_LOG_FORWARD 0           0
+    PAXOS_LOG_COLOCATE0           0
+    PAXOS_LOG_COLOCATE_FORWARD0           0
+    PAXOS_REPLICATE   0           0
+
+    Response Types    # msgs      # bytes
+    RESP_OK           2453        1814400
+    RESP_ABORT        0           0
+    RESP_FAIL         0           0
+    PREPARED_OK       2424        1800830
+    PREPARED_OK_RO    0           0
+    PREPARED_ABORT    0           0
+    ACK               2432        1805070
+    SYS_RESP          0           0
+    time_read_queue:              0
+    time_output_idle:             0
+    bytes_received:               0
+    time_recv_msg:                0
+    time_write_queue:             0
+    time_input_idle:              0
+    logging_send_time:            0
+    logging_commit_time:          0
+    single_part_execute_phase (in us) :33.8337
+    single_part_precommit_phase (in us) :0
+    single_part_log_latency (in us) :0
+    single_part_commit_phase (in us) :5645.9
+    single_part_abort (in us) :   80243.3
+    multi_part_execute_phase (in us) :260.146
+    multi_part_precommit_phase (in us) :0
+    multi_part_prepare_phase (in us) :2858.26
+    multi_part_commit_phase (in us) :1389.38
+    multi_part_abort (in us) :    156668
+    multi_part_cleanup_phase (in us) :2182.67
+    terminate_time:               0
+    log_ready_time:               0
+    dependency_ready_time:        0
+    CC (row):                     0
+    CC (index):                   0
+    logic:                        0
+    wait:                         0
+    network:                      0
+    cache:                        0
+    time_debug1:                  0
+    time_debug2:                  0
+    time_debug3:                  0
+    time_debug4:                  0
+    time_rpc:                     0.000390412
+    time_debug6:                  0
+    time_debug7:                  448.093
+    log_if_ne:                    0
+    log_if_ne_iso:                0
+    log_if_ne_data:               0
+    log_if_ne_data_iso:           0
+    log_sync:                     0
+    log_sync_data:                308.032
+    log_sync_data_iso:            0
+    log_async:                    19.4715
+    log_async_data:               0
+    log_async_data_iso:           0
+
+    average_DummyReply_req_latency:220.061
+    max_DummyReply_req_latency:1628.47
+    min_DummyReply_req_latency:0
+    average_READ_REQ_req_latency:-nan
+    max_READ_REQ_req_latency:0
+    min_READ_REQ_req_latency:0
+    average_PREPARE_REQ_req_latency:-nan
+    max_PREPARE_REQ_req_latency:0
+    min_PREPARE_REQ_req_latency:0
+    average_COMMIT_REQ_req_latency:2009.01
+    max_COMMIT_REQ_req_latency:14538.4
+    min_COMMIT_REQ_req_latency:0
+    average_ABORT_REQ_req_latency:-nan
+    max_ABORT_REQ_req_latency:0
+    min_ABORT_REQ_req_latency:0
+    average_SYS_REQ_req_latency:-nan
+    max_SYS_REQ_req_latency:0
+    min_SYS_REQ_req_latency:0
+    average_TERMINATE_REQ_req_latency:2164.23
+    max_TERMINATE_REQ_req_latency:9243.45
+    min_TERMINATE_REQ_req_latency:0
+    average_PAXOS_LOG_req_latency:-nan
+    max_PAXOS_LOG_req_latency:0
+    min_PAXOS_LOG_req_latency:0
+    average_PAXOS_LOG_FORWARD_req_latency:0
+    max_PAXOS_LOG_FORWARD_req_latency:0
+    min_PAXOS_LOG_FORWARD_req_latency:0
+    average_PAXOS_LOG_COLOCATE_req_latency:0
+    max_PAXOS_LOG_COLOCATE_req_latency:0
+    min_PAXOS_LOG_COLOCATE_req_latency:0
+    average_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    max_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    min_PAXOS_LOG_COLOCATE_FORWARD_req_latency:0
+    average_PAXOS_REPLICATE_req_latency:0
+    max_PAXOS_REPLICATE_req_latency:0
+    min_PAXOS_REPLICATE_req_latency:0
+    average_log_sync_data: 6070.07
+    average_log_async: 1850.73
+    average_prepare_req_cnt:      1.00984
+    average_prepare_req_size:     993.708
+    average_prepare_resp_cnt:     1.00984
+    average_prepare_resp_size:    748.256
+    average_node_communicate:     195.206
+    average_dist_latency:         0.161176
+    average_dist_total_time:      0.163359
+    average_latency:              0.0897027
+    90%_latency:                  0.258233
+    95%_latency:                  0.541396
+    99%_latency:                  1.2337
+    max_latency:                  5.42941
+    90%_dist_latency:             0.545078
+    95%_dist_latency:             0.842122
+    99%_dist_latency:             1.40827
+    max_dist_latency:             3.25394
+    num_commits:                  54613
+    num_aborts:                   948870
+    num_precommits:               0
+    num_waits:                    0
+    num_single_part_txn:          51870
+    num_multi_part_txn:           2743
+    num_aborts_restart:           948688
+    num_aborts_terminate:         182
+    num_aborts_local:             948870
+    num_aborts_remote:            0
+    num_affected_txn:             0
+    log_num:                      0
+    msg_cnt:                      0
+    msg_size:                     0
+    num_renewals:                 0
+    num_no_need_to_renewal:       0
+    num_cache_bypass:             0
+    num_cache_reads:              0
+    num_cache_hits:               0
+    num_cache_misses:             0
+    num_cache_remove:             0
+    num_cache_inserts:            0
+    num_cache_updates:            0
+    num_cache_evictions:          0
+    num_local_hits:               0
+    num_renew:                    0
+    num_renew_success:            0
+    num_renew_failure:            0
+    num_ro_read:                  0
+    num_ro_check:                 0
+    num_rw_read:                  0
+    num_rw_check:                 0
+    int_debug1:                   0
+    int_debug2:                   0
+    num_prepare:                  2743
+    int_debug4:                   0
+    int_debug5:                   0
+    int_debug6:                   0
+    int_urgentwrite:              0
+    int_aborts_rs1:               0
+    int_aborts_rs2:               0
+    int_aborts_rs3:               0
+    int_aborts_ws1:               0
+    int_aborts_ws2:               0
+    int_saved_by_histnum_log_if_ne:0
+    num_log_if_ne_iso:            0
+    num_log_if_ne_data:           0
+    num_log_if_ne_data_iso:       0
+    num_log_sync:                 0
+    num_log_sync_data:            0
+    num_log_sync_data_iso:        50746
+    num_log_async:                0
+    num_log_async_data:           10521
+    num_log_async_data_iso:       0
+    :                             0
+TPCC Per Txn Type Commits/Aborts
+    Txn Name          Commits     Aborts      Time
+    Payment           17097       897852      4417.88
+    New Order         18073       45054       343.76
+    Order Status      1586        0           0.0208761
+    Delivery          16175       5295        133.314
+    Stock Level       1682        669         3.96349
+=RPC Messages=
+    Request Types     # msgs      # bytes
+    DummyReply        0           0
+    READ_REQ          0           0
+    PREPARE_REQ       2770        2725741
+    COMMIT_REQ        2770        2725741
+    ABORT_REQ         12          2688
+    SYS_REQ           0           0
+    TERMINATE_REQ     0           0
+    PAXOS_LOG         0           0
+    PAXOS_LOG_FORWARD 0           0
+    PAXOS_LOG_COLOCATE0           0
+    PAXOS_LOG_COLOCATE_FORWARD0           0
+    PAXOS_REPLICATE   0           0
+
+    Response Types    # msgs      # bytes
+    RESP_OK           2800        2066565
+    RESP_ABORT        0           0
+    RESP_FAIL         0           0
+    PREPARED_OK       2770        2052465
+    PREPARED_OK_RO    0           0
+    PREPARED_ABORT    0           0
+    ACK               2782        2058825
+    SYS_RESP          0           0
+[run_exp.py] waiting for compute-1 to join
+[run_exp.py] compute-1 has joined
+[run_exp.py] waiting for compute-2 to join
+[run_exp.py] compute-2 has joined
+[run_exp.py] executing: scp itsnasa@10.10.1.2:/users/itsnasa/Cornus-2.0/outputs/temp.out /users/itsnasa/Cornus-2.0/outputs/temp-1.out
+temp.out                                                                              100% 8714    25.5MB/s   00:00
+[run_exp.py] executing: scp itsnasa@10.10.1.3:/users/itsnasa/Cornus-2.0/outputs/temp.out /users/itsnasa/Cornus-2.0/outputs/temp-2.out
+temp.out                                                                              100% 8599    13.9MB/s   00:00
