@@ -32,13 +32,13 @@ LogBuffer::LogBuffer()
     this->_commit_buf_size = 0;
     this->commit_buffer_condition = new std::condition_variable;
 
-    this->_max_sync_log_buffer_size = DEFAULT_BUFFER_SIZE;
-    this->last_sync_log_flush_timestamp = 0;
-    this->_sync_log_buffer_spilling = false;
-    this->_sync_log_buffer_lock = new std::mutex;
-    this->_sync_log_flush_lock = new std::mutex;
-    this->_sync_log_buffer_signal = new std::condition_variable;
-    this->sync_log_buffer_condition = new std::condition_variable;
+    // this->_max_sync_log_buffer_size = DEFAULT_BUFFER_SIZE;
+    // this->last_sync_log_flush_timestamp = 0;
+    // this->_sync_log_buffer_spilling = false;
+    // this->_sync_log_buffer_lock = new std::mutex;
+    // this->_sync_log_flush_lock = new std::mutex;
+    // this->_sync_log_buffer_signal = new std::condition_variable;
+    // this->sync_log_buffer_condition = new std::condition_variable;
     
 }
 
