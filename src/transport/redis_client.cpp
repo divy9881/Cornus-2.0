@@ -71,7 +71,9 @@ async_callback(cpp_redis::reply & response) {
         false, false);
     uint64_t starttime = response.as_array()[1].as_integer();
     // mark as returned. 
-    txn->rpc_log_semaphore->decr();
+    if (txn != NULL) {
+        txn->rpc_log_semaphore->decr();
+    }
     INC_FLOAT_STATS(log_async, get_sys_clock() - starttime);
     INC_INT_STATS(num_log_async, 1);
 }

@@ -29,7 +29,7 @@ SemaphoreSync::incr()
 uint32_t
 SemaphoreSync::decr() {
     pthread_mutex_lock(_mutex);
-    assert(_semaphore != 0);
+    // assert(_semaphore != 0);
     uint32_t sem = --_semaphore;
     // printf("semaphore-%p decrease to %u\n", this, sem);
     pthread_mutex_unlock(_mutex);

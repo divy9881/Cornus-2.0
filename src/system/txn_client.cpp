@@ -52,7 +52,7 @@ TxnManager::process_commit_phase_singlepart(RC rc)
     if (!is_read_only()) {
     #if LOG_DEVICE == LOG_DVC_REDIS
         #if GROUP_COMMITS_ENABLE
-            LOGGER->add_prepare_log(g_node_id, get_txn_id(), rc_to_state(rc), data);
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), rc_to_state(rc), data);
         #else
             redis_client->log_sync_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
         #endif
