@@ -194,7 +194,7 @@ TxnManager::process_decision_request(const SundialRequest* request,
     rpc_log_semaphore->incr();
     thd_id = request->thd_id();
     #if LOG_DEVICE == LOG_DVC_REDIS
-        #if GROUP_COMMITS_ENABLE:
+        #if GROUP_COMMITS_ENABLE
             LOGGER->add_commit_log(g_node_id, get_txn_id(), status, "");
         #else
             redis_client->log_async(g_node_id, get_txn_id(), status);
