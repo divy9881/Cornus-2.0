@@ -194,7 +194,11 @@ TxnManager::process_decision_request(const SundialRequest* request,
     rpc_log_semaphore->incr();
     thd_id = request->thd_id();
     #if LOG_DEVICE == LOG_DVC_REDIS
-    redis_client->log_async(g_node_id, get_txn_id(), status);
+        #if GROUP_COMMITS_ENABLE:
+            LOGGER->add_commit_log(g_node_id, get_txn_id(), status, "");
+        #else
+            redis_client->log_async(g_node_id, get_txn_id(), status);
+        #endif
     #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
     azure_blob_client->log_async(g_node_id, get_txn_id(), status);
     #elif LOG_DEVICE == LOG_DVC_CUSTOMIZED
@@ -226,10 +230,17 @@ TxnManager::process_terminate_request(const SundialRequest* request,
         case RUNNING:
             // self has not voted yes, log abort and cleanup
             #if LOG_DEVICE == LOG_DVC_REDIS
-            if (redis_client->log_sync(g_node_id, get_txn_id(), ABORTED)
-            == FAIL) {
-                return FAIL;
-            }
+                #if GROUP_COMMITS_ENABLE
+                    LOGGER->add_commit_log(g_node_id, get_txn_id(), ABORTED, "");
+                    _cc_manager->cleanup(ABORT);
+                    _txn_state = ABORTED;
+                    return ABORT;
+                #else            
+                if (redis_client->log_sync(g_node_id, get_txn_id(), ABORTED)
+                == FAIL) {
+                    return FAIL;
+                }
+                #endif
             #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
             if (azure_blob_client->log_sync(g_node_id, get_txn_id(), ABORTED)
             == FAIL) {

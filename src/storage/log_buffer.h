@@ -41,13 +41,22 @@ public:
     uint64_t _max_commit_buffer_size; // Maximum size of records that can be in the buffer at once
     uint64_t _commit_buf_size; // CUrrent count of total logs added
     
+    // std::map<uint64_t, std::vector<std::pair<uint64_t, int>>> _sync_log_buffer;
+    // std::mutex *_sync_log_buffer_lock, *_sync_log_flush_buffer;
+    // std::condition_variable *_sync_log_buffer_signal, *sync_log_buffer_condition;
+    // std::atomic_bool _sync_log_buffer_spilling;
+    // uint64_t _max_sync_log_buffer_size; // Maximum size of records that can be in the buffer at once
+    // uint64_t _sync_log_buf_size; // CUrrent count of total logs added
+    
     static LogBuffer *logBufferInstance;
     bool prepare_flush_thread_running = false;
+    // bool sync_log_flush_thread_running = false;
     bool commit_flush_thread_running = false;
 
 public:
     uint64_t last_prepare_flush_timestamp;
     uint64_t last_commit_flush_timestamp;
+    // uint64_t last_sync_log_flush_timestamp;
 
     LogBuffer();
     ~LogBuffer();
@@ -56,13 +65,21 @@ public:
     static LogBuffer *getBufferInstance();
     int add_prepare_log(uint64_t node_id, uint64_t txn_id, int status, std::string data);
     int add_commit_log(uint64_t node_id, uint64_t txn_id, int status, std::string data);
+    // int add_sync_log(uint64_t node_id, uint64_t txn_id, int status);
+
     void print();
+
     void flush_prepare_logs();
     void flush_commit_logs();
+    // void flush_sync_logs();
+
     void start_prepare_flush_thread();
     void start_commit_flush_thread();
+    // void start_sync_log_flush_thread();
+
     void stop_prepare_flush_thread();
     void stop_commit_flush_thread();
+    // void stop_sync_log_flush_thread();
 };
 
 // void * flush_prepare_logs(void* args);

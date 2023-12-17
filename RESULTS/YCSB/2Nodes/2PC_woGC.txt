@@ -372,3 +372,5 @@
 [run_exp.py] compute-1 has joined
 [run_exp.py] executing: scp itsnasa@10.10.1.2:/users/itsnasa/Cornus-2.0/outputs/temp.out /users/itsnasa/Cornus-2.0/outputs/temp-1.out
 temp.out
+
+2990.97

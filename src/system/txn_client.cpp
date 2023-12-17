@@ -51,7 +51,11 @@ TxnManager::process_commit_phase_singlepart(RC rc)
     // if logging didn't happen, process commit phase
     if (!is_read_only()) {
     #if LOG_DEVICE == LOG_DVC_REDIS
-       redis_client->log_sync_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
+        #if GROUP_COMMITS_ENABLE
+            LOGGER->add_prepare_log(g_node_id, get_txn_id(), rc_to_state(rc), data);
+        #else
+            redis_client->log_sync_data(g_node_id, get_txn_id(), rc_to_state(rc), data);
+        #endif
     #elif LOG_DEVICE == LOG_DVC_AZURE_BLOB
        azure_blob_client->log_sync_data(g_node_id, get_txn_id(), rc_to_state(rc),
            data);
@@ -528,7 +532,11 @@ TxnManager::sendReplicateRequest(State state, uint64_t log_data_size) {
         sent++;
     }
     // use sync request to avoid semaphore updating
+    #if GROUP_COMMITS_ENABLE
+    LOGGER->add_commit_log(g_node_id, get_txn_id(), state, data);
+    #else
     redis_client->log_sync_data(g_node_id, get_txn_id(), state, data);
+    #endif
     // wait for quorum
     rpc_log_semaphore->wait();
 }
