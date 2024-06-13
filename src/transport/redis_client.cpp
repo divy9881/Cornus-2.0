@@ -226,6 +226,28 @@ RedisClient::log_sync_data(uint64_t node_id, uint64_t txn_id, int status,
     return RCOK;
 }
 
+// Group commit
+RC
+RedisClient::log_async_data(uint64_t txn_id, uint64_t largest_seq_no, string &data) {
+    if (!glob_manager->active)
+        return FAIL;
+    uint64_t starttime = get_sys_clock();
+    // log format - key-value
+    // key: "type(data/status)-node_id-txn_id"
+    auto script = R"(
+        redis.call('set', KEYS[1], ARGV[1])
+        return {tonumber(ARGV[2]), tonumber(ARGV[3])}
+    )";
+    string tid = std::to_string(txn_id);
+    string id = tid + "-" + std::to_string(largest_seq_no);
+    std::vector<std::string> keys = {"data-" + id};
+    std::vector<std::string> args = {data,
+                                     tid, std::to_string(starttime)};
+    clients[0]->eval(script, keys, args, async_callback);
+    clients[0]->commit();
+    return RCOK;
+}
+
 RC
 RedisClient::log_async_data(uint64_t node_id, uint64_t txn_id, int status,
                            string & data) {

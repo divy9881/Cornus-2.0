@@ -292,6 +292,32 @@ AzureBlobClient::log_sync_data(uint64_t node_id, uint64_t txn_id, int status,
     return RCOK;
 }
 
+// TODO Make it full-fledged function
+RC
+AzureBlobClient::log_async_data(uint64_t txn_id, uint64_t largest_txn_id,
+                                string &data) {
+    if (!glob_manager->active)
+        return FAIL;
+    uint64_t starttime = get_sys_clock();
+    string id = std::to_string(txn_id) + "-" + std::to_string(largest_txn_id);
+    azure::storage::cloud_block_blob blob_status = container.get_block_blob_reference(U("data-" + id));
+#if COMMIT_ALG == TWO_PC
+        // pplx::task<void> upload_task_data = blob_status.upload_text_async(U(std::to_string(status) + "," + data));
+        pplx::task<void> upload_task_data = blob_status.upload_text_async(data);
+        upload_task_data.then(
+            [starttime, blob_status, status, txn_id]() -> void {
+                INC_FLOAT_STATS(log_async_data, get_sys_clock() - starttime);
+                INC_INT_STATS(num_log_async_data, 1);
+                // when upload finish, update log_semaphore
+                TxnManager *txn = txn_table->get_txn(txn_id, false, false);
+                if (txn != NULL) {
+                    txn->rpc_log_semaphore->decr();
+                }
+            });
+#endif
+    return RCOK;
+}
+
 RC
 AzureBlobClient::log_async_data(uint64_t node_id, uint64_t txn_id, int status,
                                 string &data) {

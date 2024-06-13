@@ -7,8 +7,8 @@
 #define NUM_STORAGE_NODES               0
 #define NODE_TYPE                       COMPUTE_NODE
 
-// number of server threads on each node
-#define NUM_WORKER_THREADS              4096 //2048 //1024
+// Number of server threads on each node
+#define NUM_WORKER_THREADS              512 //4096 //2048 //1024
 #define NUM_RPC_SERVER_THREADS          24
 
 // Statistics
@@ -23,9 +23,9 @@
 
 // WORKLOAD can be YCSB or TPCC
 #define WORKLOAD                        TPCC
-#define RUN_TIME                        10 // in second
+#define RUN_TIME                        20 // in second
 
-// debugging
+// Debugging
 #define DEBUG_PRINT                     false
 #define DEBUG_ELR                       false
 
@@ -59,10 +59,10 @@
 #define WRITE_PERMISSION_LOCK           false
 #define ATOMIC_TIMESTAMP                "false"
 
-// when WAW_LOCK is true, lock a tuple before write.
+// Ehen WAW_LOCK is true, lock a tuple before write.
 // essentially, WW conflicts are handled as 2PL.
 #define OCC_WAW_LOCK                    true
-// if SKIP_READONLY_PREPARE is true, then a readonly subtxn will forget
+// If SKIP_READONLY_PREPARE is true, then a readonly subtxn will forget
 // about its states after returning. If no renewal is required, this remote
 // node will not participate in the 2PC protocol.
 #define SKIP_READONLY_PREPARE           false
@@ -90,7 +90,7 @@
 #define UPDATE_TABLE_TS                 true
 
 // [HSTORE]
-// when set to true, hstore will not access the global timestamp.
+// When set to true, hstore will not access the global timestamp.
 // This is fine for single partition transactions.
 #define HSTORE_LOCAL_TS                 false
 
@@ -101,10 +101,18 @@
 #define LOG_SIZE_PER_WRITE              32 // in bytes
 #define LOG_TLS_REDIS                   false // if redis needs tls tunnel
 #define AZURE_ISOLATION_ENABLE          true
+#define GROUP_COMMITS_ENABLE            false // Group the commit logs and flush once
+// Group commit logging parameters
+#define DEFAULT_BUFFER_SIZE             5000
+#define EMPTY_LOG_BUFFER_TIMEDELTA      300 // 300ms
+#define EMPTY_LOG_BUFFER_HW             80 // High watermark in log buffer to schedule spillover to persistent storage
+#define LOG_BUFFER_HW_CAPACITY\
+            int(DEFAULT_BUFFER_SIZE*(EMPTY_LOG_BUFFER_HW/100))
+
 
 // Benchmark
 // =========
-// max number of rows touched per transaction
+// Max number of rows touched per transaction
 #define MAX_TUPLE_SIZE                  1024 // in bytes
 #define INIT_PARALLELISM                8
 
@@ -146,13 +154,13 @@
 
 // Distributed DBMS
 // ================
-#define COMMIT_ALG                      ONE_PC
+#define COMMIT_ALG                      TWO_PC
 #define COMMIT_VAR                      NO_VARIANT
 #define DEBUG_LOG                       false
 
 // Constant
 // ========
-// index structure
+// Index structure
 #define IDX_HASH                        1
 #define IDX_BTREE                       2
 // WORKLOAD
@@ -199,4 +207,3 @@
 // Node Type
 #define COMPUTE_NODE                    1
 #define STORAGE_NODE                    2
-
